@@ -8,7 +8,12 @@ exportPattern(".")
 import(
     "Rcpp",
     "gtools",
-    "methods"
+    "methods",
+    "statmod",
+    "abind",
+    "msm",
+    "MASS",
+    "Rmpfr"
 )
 importFrom("stats", "aggregate", "rbinom", "rexp", "rnorm", "runif")
 

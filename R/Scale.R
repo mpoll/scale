@@ -275,7 +275,7 @@ approx.intensity  <- function(eta.pos){phiCfn <- ss.phiC(eta.pos); c(phiCfn$phiL
 #### 3.5 - Resampling Step - Event Rotational Implementation
 #############################################
 
-scale.resamp <- function(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=NULL,p.cyc.arr=NULL){
+scale_resamp <- function(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=NULL,p.cyc.arr=NULL){
     ###### 1 ###### Perform weight control function - Subtract maximum log weight to control floating point precision, normalise and calculate ESS
     wei.control <- part.ess(log.p.wei,p.num)
     ###### 2 ###### Subtract maximum log weight to control floating point precision
@@ -313,7 +313,7 @@ scale.resamp <- function(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I,p.dap
 ######## 3.3.1 - Set weights to zero
 #############################################
 
-scale.zero.wei  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up){
+scale_zero.wei  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up){
     p.anc.neg.append <- c(p.event.ch,exp(log.p.wei[p.curr.idx]),p.curr[c("t","PhiL","PhiU")]) # Ancestral Negative Weight Record
     list(p.anc.neg.append=p.anc.neg.append,ss.phiC=ss.phiC)}
 
@@ -321,7 +321,7 @@ scale.zero.wei  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.
 ######## 3.3.3 - Set weights and index PhiC
 #############################################
 
-scale.zero.inc  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up){
+scale_zero.inc  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up){
     p.anc.neg.append <- c(p.event.ch,exp(log.p.wei[p.curr.idx]),p.curr[c("t","PhiL","PhiU")]) # Ancestral Negative Weight Record
     p.phi <- p.curr["PhiU"]-p.event.ch*p.curr["Delta"] # Compute what phi was
     print(sprintf("Old PhiL:%f, Old PhiU:%f",p.curr["PhiL"],p.curr["PhiU"]))
@@ -344,7 +344,7 @@ ss.phiC.up      <- function(p.phi,p.phiL,p.phiU){function(p.mat.curr){list(phiL=
 #### 4.1 - Scale Algorithm Approximate Version
 #############################################
 
-scale.approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale.zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
+scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
     #################
     #### (0)1 #### Initalise Algorithm
     #################
@@ -402,7 +402,7 @@ scale.approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tra
             p.layer["deg.s",] <- p.layer["s",] <- curr.deg.time  # Index left hand time point and current time
             t.inc.next <- min(curr.deg.time + t.inc, T.fin) # Index increment time
             ###### (t.inc)2.2.a.5 ##### Resample
-            p.resamp <- scale.resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=1,p.dapts,ss.size,resamp.method,ess.thresh) # Resample particles
+            p.resamp <- scale_resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=1,p.dapts,ss.size,resamp.method,ess.thresh) # Resample particles
             p.anc.ess <- c(p.anc.ess,p.resamp$ess) # Record ancestoral ESS at mesh point
             p.idx <- p.resamp$p.idx; log.p.wei <- p.resamp$log.p.wei # Update particle indicies and weights (normalised)
             if(p.resamp$resamp.I==1){p.anc.resamp <- c(p.anc.resamp,curr.deg.time); p.mat <- p.resamp$p.mat; p.layer <- p.resamp$p.layer; p.dapts <- p.resamp$p.dapts} # If there has been resampling, update ancestral resampling times, layer and dapts
@@ -437,7 +437,7 @@ scale.approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tra
                 p.layer["deg.s",] <- curr.deg.time <- p.curr["deg.s"] # Index current degradation time
                 p.bet.degrad <- p.bet.degrad.r  # Reset particle between resampling degradation matrix
                 ### Resample
-                p.resamp <- scale.resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=0,p.dapts,ss.size,resamp.method,ess.thresh) # Resample particles
+                p.resamp <- scale_resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=0,p.dapts,ss.size,resamp.method,ess.thresh) # Resample particles
                 p.idx <- p.resamp$p.idx; log.p.wei <- p.resamp$log.p.wei # Update particle indicies and weights (normalised)
                 if(p.resamp$resamp.I==1){p.anc.resamp <- c(p.anc.resamp,curr.deg.time); p.mat <- p.resamp$p.mat; p.layer <- p.resamp$p.layer; p.dapts <- p.resamp$p.dapts} # If there has been resampling, update ancestral resampling times, layer and dapts
             } # Close reasampling if statement
@@ -460,7 +460,7 @@ scale.approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tra
 ### theta <- NULL; prev.simn <- NULL; x.init <- NULL; T.start <- 0; theta <- NULL; phi.record <- FALSE; ess.thresh <- 0.5
 
 
-scale.exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale.zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
+scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
     #################
     #### (0)1 #### Initalise Algorithm
     #################
@@ -522,7 +522,7 @@ scale.exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tran
             p.layer["deg.s",] <- p.layer["s",] <- curr.deg.time  # Index left hand time point and current time
             t.inc.next <- min(curr.deg.time + t.inc, T.fin) # Index increment time
             ###### (t.inc)2.2.a.5 ##### Resample
-            p.resamp <- scale.resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=1,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=p.pass.arr,p.cyc.arr=p.cyc.arr) # Resample particles
+            p.resamp <- scale_resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=1,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=p.pass.arr,p.cyc.arr=p.cyc.arr) # Resample particles
             p.anc.ess <- c(p.anc.ess,p.resamp$ess) # Record ancestoral ESS at mesh point
             p.idx <- p.resamp$p.idx; log.p.wei <- p.resamp$log.p.wei # Update particle indicies and weights (normalised)
             if(p.resamp$resamp.I==1){p.anc.resamp <- c(p.anc.resamp,curr.deg.time); p.mat <- p.resamp$p.mat; p.layer <- p.resamp$p.layer; p.dapts <- p.resamp$p.dapts; p.pass.arr <- p.resamp$p.pass.arr; p.cyc.arr <- p.resamp$p.cyc.arr} # If there has been resampling, update ancestral resampling times, layer, dapts and cycling arrays
@@ -568,7 +568,7 @@ scale.exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tran
                 p.layer["deg.s",] <- curr.deg.time <- p.curr["deg.s"] # Index current degradation time
                 p.bet.degrad <- p.bet.degrad.r  # Reset particle between resampling degradation matrix
                 ### Resample
-                p.resamp <- scale.resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=0,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=p.pass.arr,p.cyc.arr=p.cyc.arr) # Resample particles
+                p.resamp <- scale_resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=0,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=p.pass.arr,p.cyc.arr=p.cyc.arr) # Resample particles
                 p.idx <- p.resamp$p.idx; log.p.wei <- p.resamp$log.p.wei # Update particle indicies and weights (normalised)
                 if(p.resamp$resamp.I==1){p.anc.resamp <- c(p.anc.resamp,curr.deg.time); p.mat <- p.resamp$p.mat; p.layer <- p.resamp$p.layer; p.dapts <- p.resamp$p.dapts; p.pass.arr <- p.resamp$p.pass.arr; p.cyc.arr <- p.resamp$p.cyc.arr} # If there has been resampling, update ancestral resampling times, layer and dapts
             } # Close reasampling if statement
@@ -587,14 +587,14 @@ scale.exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tran
 #############################################
 #### 4.3 - Scale Algorithm - Select Exact / Approximate (Approxmate is default)
 #############################################
-scale <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale.zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale.version=scale.approx){scale.version(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=T.start,x.init=x.init,ss.size=ss.size,ess.thresh=ess.thresh,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,prev.simn=prev.simn,progress.check=progress.check,phi.record=phi.record,resamp.freq=resamp.freq,theta=theta,p.path.renew=p.path.renew)}
+scale <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale_version=scale_approx){scale_version(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=T.start,x.init=x.init,ss.size=ss.size,ess.thresh=ess.thresh,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,prev.simn=prev.simn,progress.check=progress.check,phi.record=phi.record,resamp.freq=resamp.freq,theta=theta,p.path.renew=p.path.renew)}
 
 #############################################
 #############################################
 #### 5 - Scale Ergodic Extraction
 #############################################
 #############################################
-scale.ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,symm=NULL,even.weights=NULL){
+scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,symm=NULL,even.weights=NULL){
     #### 1.1 #### Assign frac.idxs depending on user assignation of retain frac of simulation
     if(is.null(retain.frac)==TRUE){
         frac.idxs <- 1:length(simn$anc.times) # If no specification include all
@@ -634,9 +634,9 @@ scale.ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.tim
 #### 6 - Extend existing scale algorithm
 #############################################
 #############################################
-scale.extend <- function(prev.simn,t.inc,T.extend,scale.version){
+scale_extend <- function(prev.simn,t.inc,T.extend,scale_version){
     ### Extend current simulation
-    new.simn <- scale.version(p.num=p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,transform=transform,un.transform=un.transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
+    new.simn <- scale_version(p.num=p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,transform=transform,un.transform=un.transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
     ### Append simulation
     append.len          <- length(new.simn$anc.times)-1 # Compute the number of additional mesh points to be added and
     if(append.len>=1){ # append if there are one or more
