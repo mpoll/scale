@@ -13,14 +13,14 @@
 ############################################
 ############################################
 
-if(exists("taskid")==FALSE){taskid <- 1}
-set.seed(taskid) # Set seed [**Required for datum generator**]
+#if(exists("taskid")==FALSE){taskid <- 1}
+#set.seed(taskid) # Set seed [**Required for datum generator**]
 
 #############################################
 #### 1.1 - Size, dimension, and parameters
 #############################################
 
-# dsz             <- 10^10                    # Size of data set
+dsz             <- 10^10                    # Size of data set
 dimen           <- 5                        # Dimensionality (>1)
 beta.truth      <- c(1,1,-1,2,-2)   # True parameters
 n.sigma         <- diag(rep(1,dimen))*dsz^(-1/2); n.sigma[1,1] <- n.sigma[1,1]/2; n.sigma.inv <- solve(n.sigma)  # Parameterise preconditioning matrix (INV FISCH INF) and specification of inverse preconditioning matrix
@@ -44,7 +44,7 @@ eta.truth       <- transform(beta.truth); eta.star <- transform(beta.star) # Spe
 #### 1.3 - Data Recaller
 #############################################
 
-library(msm)                            # Package to generate truncated Normals
+library('msm')                            # Package to generate truncated Normals
 design.thresh   <- 1                    # Thresholding of truncated Normals
 
 datum     <- function(datum.idx){ # Function to re-generate data (without storage) - won't work with seeds larger than 2^53-1
