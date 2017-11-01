@@ -130,6 +130,6 @@ ss.phiC <- function(p.mat.curr,l.bound=NULL,u.bound=NULL){ # Function of current
         alpha.prime.bds[j]  <- dsz*sum(distance*dim.grad.max[j,,2]) # alpha prime bounds
     }
     A.bds   <- alpha.bds^2 # Compute bounds on alpha^2
-    phi.bds <- (sum(2*abs(alpha.cent)*alpha.bds)+sum(A.bds)+sum(alpha.prime.bds))/2 # Compute bounds (modulo normalisation) on subsampled phi
-    phiL <- phi.cent - phi.bds; phiU <- phi.cent + phi.bds; intensity <- phiU - phiL # Compute Bounding functionals and intensity
+    phi.bds <- (sum(2*abs(scale::alpha.cent)*alpha.bds)+sum(A.bds)+sum(alpha.prime.bds))/2 # Compute bounds (modulo normalisation) on subsampled phi
+    phiL <- scale:phi.cent - phi.bds; phiU <- scale:phi.cent + phi.bds; intensity <- phiU - phiL # Compute Bounding functionals and intensity
     list(distance=distance,alpha.bds=alpha.bds,alpha.prime.bds=alpha.prime.bds,A.bds=A.bds,phiL=phiL,phiU=phiU,intensity=intensity)}

@@ -231,7 +231,7 @@ p.path.renew <- function(pass.mat,cyc.mat,curr.time,x.curr,next.time,theta,dimen
         list(curr.time=next.time,next.tau=cyc.mat[1,"tau"],max.next=cyc.mat[1,"tau"]-next.time,pass.mat=pass.mat,cyc.mat=cyc.mat,x.next=x.next)}
     else{
         repeat{x.next <- eabesmid(next.time,curr.time,pass.mat["tau"],pass.mat["tau"],x.curr,pass.mat["y"],pass.mat["y"],pass.mat["minI"])$w; if(eabesex(sV=c(curr.time,next.time),tV=c(next.time,pass.mat["tau"]),xV=c(x.curr,x.next),yV=c(x.next,pass.mat["y"]),m=pass.mat["y"],B1=x.curr+pass.mat["minI"]*theta,B2=x.curr+pass.mat["minI"]*theta,minI=pass.mat["minI"])$accI==1){break}} # If sample path retains alternate barrier then accept else reject
-        new.fpt <- bm.pass(s=next.time,x=x.next,theta=theta,Jst.t=t.opt,Jst.rat=rat.opt); pass.mat[] <- c(update.dimen,new.fpt$tau,new.fpt$y,new.fpt$minI,x.next-theta,x.next+theta)
+        new.fpt <- bm.pass(s=next.time,x=x.next,theta=theta,Jst.t=t.opt,Jst.rat=rat.opt); pass.mat[] <- c(scale::update.dimen,new.fpt$tau,new.fpt$y,new.fpt$minI,x.next-theta,x.next+theta)
         list(curr.time=next.time,next.tau=pass.mat["tau"],max.next=pass.mat["tau"]-next.time,pass.mat=pass.mat,cyc.mat=pass.mat,x.next=x.next)}}
 
 #############################################
@@ -253,11 +253,11 @@ ac.phi          <- function(eta.pos,dapts){
 #############################################
 
 ss.phi          <- function(eta.pos,dapts){
-    beta.pos <- un.transform(eta.pos); factor <- dsz/ss.size # Specify beta position and factor
+    beta.pos <- un.transform(eta.pos); factor <- dsz/scale::ss.size # Specify beta position and factor
     data1 <- data.eval(beta.pos,dapts[1,,"dapt.1"],factor=factor); data1.star <- data.eval(beta.star,dapts[1,,"dapt.1"],factor=factor) # Evaluate data grad log and lap log (ss 1)
     data2 <- data.eval(beta.pos,dapts[1,,"dapt.2"],factor=factor); data2.star <- data.eval(beta.star,dapts[1,,"dapt.2"],factor=factor) # Evaluate data grad log and lap log (ss 2)
     data3 <- data.eval(beta.pos,dapts[1,,"dapt.3"],factor=factor); data3.star <- data.eval(beta.star,dapts[1,,"dapt.3"],factor=factor) # Evaluate data grad log and lap log (ss 3)
-    ((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data3$lap.log.pi)-sum(data3.star$lap.log.pi) + alpha.cent.sq + alpha.p.cent)/2}
+    ((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*scale::alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data3$lap.log.pi)-sum(data3.star$lap.log.pi) + scale::alpha.cent.sq + scale::alpha.p.cent)/2}
 
 #############################################
 #### 3.3 - TURN OFF THE SUB SAMPLER (REQUIRES SETTING ss.on <- FALSE)
@@ -451,7 +451,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tra
     ########################
     #### (T.fin) #### Output
     ########################
-    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=NULL,p.pass.arr=NULL,transform=transform,un.transform=un.transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
+    list(p.num=scale::p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=NULL,p.pass.arr=NULL,transform=transform,un.transform=un.transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
 
 #############################################
 #### 4.2 - Scale Algorithm Exact Version
