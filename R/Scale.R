@@ -231,7 +231,7 @@ p.path.renew <- function(pass.mat,cyc.mat,curr.time,x.curr,next.time,theta,dimen
         list(curr.time=next.time,next.tau=cyc.mat[1,"tau"],max.next=cyc.mat[1,"tau"]-next.time,pass.mat=pass.mat,cyc.mat=cyc.mat,x.next=x.next)}
     else{
         repeat{x.next <- eabesmid(next.time,curr.time,pass.mat["tau"],pass.mat["tau"],x.curr,pass.mat["y"],pass.mat["y"],pass.mat["minI"])$w; if(eabesex(sV=c(curr.time,next.time),tV=c(next.time,pass.mat["tau"]),xV=c(x.curr,x.next),yV=c(x.next,pass.mat["y"]),m=pass.mat["y"],B1=x.curr+pass.mat["minI"]*theta,B2=x.curr+pass.mat["minI"]*theta,minI=pass.mat["minI"])$accI==1){break}} # If sample path retains alternate barrier then accept else reject
-        new.fpt <- bm.pass(s=next.time,x=x.next,theta=theta,Jst.t=t.opt,Jst.rat=rat.opt); pass.mat[] <- c(scale::update.dimen,new.fpt$tau,new.fpt$y,new.fpt$minI,x.next-theta,x.next+theta)
+        new.fpt <- bm.pass(s=next.time,x=x.next,theta=theta,Jst.t=t.opt,Jst.rat=rat.opt); pass.mat[] <- c(1,new.fpt$tau,new.fpt$y,new.fpt$minI,x.next-theta,x.next+theta)
         list(curr.time=next.time,next.tau=pass.mat["tau"],max.next=pass.mat["tau"]-next.time,pass.mat=pass.mat,cyc.mat=pass.mat,x.next=x.next)}}
 
 #############################################
