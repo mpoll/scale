@@ -27,7 +27,7 @@
 
         p.num       <- 2^10 #spec.mat[1,taskid]      # Number of particles
         t.inc       <- 0.1
-        T.extend    <- 1
+        T.extend    <- 0.1
         ss.size     <- 10 #spec.mat[2,taskid]
 
     ### File Name
@@ -36,11 +36,11 @@
     # Simulations
         # Initialise Algorithm
         scale_logistic_start <- function() {
-            time.elapse <- system.time(simn <- scale(p.num,t.inc,T.extend,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=TRUE,phi.record=TRUE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale_version=scale_version))
+            time.elapse <- system.time(simn <<- scale(p.num,t.inc,T.extend,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=TRUE,phi.record=TRUE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale_version=scale_version))
         }
         # Algorithm Loop
         scale_logistic_step<- function(fnm) {
-            time.inc <- system.time(simn <- scale_extend(simn,t.inc,T.extend,scale_version))
+            time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend,scale_version))
             cat("savingfile",fnm,"\n");
             save.image(file=fnm)
         }
