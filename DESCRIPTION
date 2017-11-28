@@ -4,10 +4,11 @@ Title: The Scaleable Langevin Exact Algorithm -- Reference Implementation
 Version: 0.1
 Date: 2017-10-31
 Author: Murray Pollock, Paul Fearnhead, Adam Johansen and Gareth Roberts
-Maintainer:  Murray Pollock <m.pollock@warwick.ac.uk>
+Maintainer: Murray Pollock <m.pollock@warwick.ac.uk>
 Description: An R implemenation of some example applications of the ScaLE algorithm is provided.
 License: GPL (>= 2)
 LazyLoad: yes
 Imports: Rcpp (>= 0.11.0), methods, gtools, statmod, abind, msm, MASS, Rmpfr
 LinkingTo: Rcpp
 LazyData: true
+RoxygenNote: 6.0.1
