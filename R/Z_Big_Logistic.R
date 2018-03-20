@@ -21,28 +21,37 @@
     #    load("/home/stsmba/Big_Logistic_Data/D_Big_Logistic.RData")
 
     ### Specification of ScaLE
-        ss.on <- TRUE # Flag indicating whether to use subsampling (SCALE) or no subsampling (QSMC)
-        scale_version <- scale_exact
+#ss.on <- TRUE # Flag indicating whether to use subsampling (SCALE) or no subsampling (QSMC)
+#scale_version <- scale_exact
         #spec.mat <- rbind(c(2^c(10:11)),c(10,10,20,20))
 
-        p.num       <- 2^10 #spec.mat[1,taskid]      # Number of particles
-        t.inc       <- 0.1
-        T.extend    <- 0.1
-        ss.size     <- 10 #spec.mat[2,taskid]
+#p.num       <- 2^10 #spec.mat[1,taskid]      # Number of particles
+#t.inc       <- 0.1
+#T.extend    <- 0.1
+ss.size     <- 10 #spec.mat[2,taskid]
 
     ### File Name
-        fnm 	<- paste("Big_Logistic_Data_P",p.num,"_S",ss.size,".RData",sep="")
+#fnm 	<- paste("Big_Logistic_Data_P",p.num,"_S",ss.size,".RData",sep="")
 
     # Simulations
         # Initialise Algorithm
-        scale_logistic_start <- function() {
-            time.elapse <- system.time(simn <<- scale(p.num,t.inc,T.extend,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=TRUE,phi.record=TRUE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale_version=scale_version));
-            list(time.elapse=time.elapse,simn=simn)
-        }
-        # Algorithm Loop
-        scale_logistic_step<- function(time.elapse,simn) {
-            time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend,scale_version))
-            #cat("savingfile",fnm,"\n");
-            #save.image(file=fnm)
-            list(time.elapse=time.elapse,simn=simn)
-        }
+
+
+### SCALE _LOGISTIC NOT CURRENTLY EXECUTABLE
+scale_logistic <- function(fnm="default.RData",p.num=2^10,t.inc=0.1,T.extend=0.1,ss.size=10,ss.on=TRUE,scale_version=scale_exact){
+    time.elapse <- system.time(simn <<- scale(p.num,t.inc,T.extend,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=TRUE,phi.record=TRUE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale_version=scale_version))[3]
+    save(file=fnm,simn=simn,time.elapse=time.elapse); print(time.elapse)
+    time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend,scale_version))[3]
+    time.elapse <- time.elapse + time.inc
+    save(file=fnm,simn,time.elapse); print(time.elapse)
+    list(time.elapse=time.elapse,simn=simn)
+    }
+
+#### CURRENTLY EXECUTABLE FUNCTION
+
+# scale_exact(p.num=2^10,t.inc=0.1,T.fin=0.2,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=2^10-1,theta=NULL,p.path.renew=p.path.renew)
+
+
+
+
+

@@ -1,7 +1,7 @@
 ############################################
 ############################################
 ######       Scale Algorithm         #######
-######  Last Updated: 25/07/2017 MP  #######
+######  Last Updated: 31/01/2017 MP  #######
 ############################################
 ############################################
 
@@ -21,12 +21,16 @@ library(Rcpp); #sourceCpp('../src/scale_rcpp.cpp') # Call CPP code
 
 library(gtools); library(Rmpfr); library(statmod); library(abind); library(MASS)
 
+# MP 1/18
 mpfrthr <- 9; mpfrpbn <- 10 # mpfr - high  precision kick in levels for alternating series
 
+# MP 1/18
 mat.sort.c <- function(mat,mat.sz,n) {mat[rank(mat[,n],ties.method="first"),] <- mat[1:mat.sz,]; return(mat)} # Define matrix sort (ranking along column)
 
+# MP 1/18
 mat.sort.r <- function(mat,mat.sz,n) {mat[,rank(mat[n,],ties.method="first")] <- mat[,1:mat.sz]; return(mat)} # Define matrix sort (ranking along a row)
 
+# MP 1/18
 ins.sort.c <- function(vec,sor.mat,sor.mat.sz,n){ # Insert a vector into a sorted matrix (ranking along a column)
     r.min <- 1; r.max <- sor.mat.sz; tau <- vec[n]
     if(tau > sor.mat[r.max,n]){r.min <- r.max <- sor.mat.sz+1}else{
@@ -35,6 +39,7 @@ ins.sort.c <- function(vec,sor.mat,sor.mat.sz,n){ # Insert a vector into a sorte
             if(tau <= sor.mat[r.mid,n]){r.max <- r.mid}else{r.min <- r.mid+1}}}
     return(rbind(sor.mat[seq_len(r.min-1),,drop=FALSE],vec,sor.mat[seq_len(sor.mat.sz-r.max+1)+r.max-1,,drop=FALSE]))}
 
+# MP 1/18
 ins.sort.r <- function(vec,sor.mat,sor.mat.sz,n){ # Insert a vector into a sorted matrix (ranking along a row)
     r.min <- 1; r.max <- sor.mat.sz; tau <- vec[n]
     if(tau > sor.mat[n,r.max]){r.min <- r.max <- sor.mat.sz+1}else{
@@ -53,10 +58,13 @@ ins.sort.r <- function(vec,sor.mat,sor.mat.sz,n){ # Insert a vector into a sorte
 #### 1.1 - Particle Normalisation
 #############################################
 
+# MP 1/18
 part.control    <- function(log.p.wei){log.p.wei - max(log.p.wei)} # Control floating point precision of weights
 
+# MP 1/18
 part.normal     <- function(log.p.wei){p.wei <- exp(log.p.wei)/sum(exp(log.p.wei)); list(log.p.wei=log(p.wei),p.wei=p.wei)} # Normalise log particle weights
 
+# MP 1/18
 part.ess        <- function(log.p.wei,p.num){normalised <- part.normal(log.p.wei);list(log.p.wei=normalised$log.p.wei,p.wei=normalised$p.wei,ess=1/(p.num*sum(normalised$p.wei^2)))} # Normalise log particle weights and compute ESS
 
 #############################################
@@ -65,6 +73,7 @@ part.ess        <- function(log.p.wei,p.num){normalised <- part.normal(log.p.wei
 ##### 1.2.1 - Multinomial Resampling
 #############################################
 
+# MP 1/18
 multi.resamp 	<- function(p.wei,n=length(p.wei)){ # Multinomial Resampling
     if((sum(p.wei)>0)&(n>0)){ # Check whether resampling possible
         p.idx		<- sample(1:length(p.wei),n,replace=TRUE,prob=p.wei) # Sampled Index
@@ -75,6 +84,7 @@ multi.resamp 	<- function(p.wei,n=length(p.wei)){ # Multinomial Resampling
 ##### 1.2.2 - Systematic Resampling
 #############################################
 
+# MP 1/18
 system.resamp	<- function(p.wei,n=length(p.wei)){ # Systematic Resampling
     if((sum(p.wei)>0)&(n>0)){ # Check whether resampling possible
         cum.wei		<- cumsum(p.wei)/sum(p.wei) # Normalise and calculate cumulative weights
@@ -87,6 +97,7 @@ system.resamp	<- function(p.wei,n=length(p.wei)){ # Systematic Resampling
 ##### 1.2.3 - Stratified Resampling
 #############################################
 
+# MP 1/18
 strat.resamp	<- function(p.wei,n=length(p.wei)){ # Stratified Resampling
     vec.length  <- length(p.wei) # Calculate the length of the input vector
     cum.wei		<- cumsum(p.wei) # Calculate cumulative weights
@@ -101,6 +112,7 @@ strat.resamp	<- function(p.wei,n=length(p.wei)){ # Stratified Resampling
 ##### 1.2.4 - Residual Resampling
 #############################################
 
+# MP 1/18
 resid.resamp	<- function(p.wei,n=length(p.wei),nest.resamp=strat.resamp){ # Residual Resampling
     if((sum(p.wei)>0)&(n>0)){ # Check whether resampling possible
         det.resamp	<- floor(n*p.wei/sum(p.wei))
@@ -122,26 +134,35 @@ resid.resamp	<- function(p.wei,n=length(p.wei),nest.resamp=strat.resamp){ # Resi
 ##### 2.1.1 - Bessel Functionals - See Pollock et al. 2015
 #############################################
 
+# MP 1/18
 eazeta		<- function(n,s,t,x,y,L,U){if(max(x-U,y-U,L-x,L-y)>=0){1}else{j<-1:(ceiling(n/2));P<--2/(t-s);D<-U-L;D1<-D*j+L;D2<-D*j-U;z<-y-x;if(even(n)){sum(exp(P*(D1-x)*(D1-y))+exp(P*(D2+x)*(D2+y))-exp(P*j^2*D^2-P*j*D*z)-exp(P*j^2*D^2+P*j*D*z))}else{sum(exp(P*(D1-x)*(D1-y))+exp(P*(D2+x)*(D2+y)))-sum(exp(P*j[1:length(j)-1]^2*D^2-P*j[1:length(j)-1]*D*z)+exp(P*j[1:length(j)-1]^2*D^2+P*j[1:length(j)-1]*D*z))}}} # Zeta Functional
 
+# MP 1/18
 eagamma		<- function(n,s,t,x,y,L,U){1-eazeta(n,s,t,x,y,L,U)} # Gamma Functional
 
+# MP 1/18
 eapsi		<- function(j,s,t,m,xoy,u){P<--2*abs(u-m)*j/(t-s);(2*abs(u-m)*j-(xoy-m))*exp(P*(abs(u-m)*j-(xoy-m)))} # Psi Functional
 
+# MP 1/18
 eachi		<- function(j,s,t,m,xoy,u){P<--2*abs(u-m)*j/(t-s);(2*abs(u-m)*j+(xoy-m))*exp(P*(abs(u-m)*j+(xoy-m)))} # Chi Functional
 
+# MP 1/18
 eadel2  	<- function(n,s,t,m,xoy,u){if(max(xoy-u,m-xoy)>=0){0}else{if(even(n)){j<-1:(n/2);1-(sum(eapsi(j,s,t,m,xoy,u)-eachi(j,s,t,m,xoy,u)))/(xoy-m)}else{if(n>1){j<-1:((n-1)/2);1-(sum(eapsi(j,s,t,m,xoy,u)-eachi(j,s,t,m,xoy,u)))/(xoy-m)-eapsi(max(j)+1,s,t,m,xoy,u)/(xoy-m)}else{1-eapsi(1,s,t,m,xoy,u)/(xoy-m)}}}}
 
+# MP 1/18
 eadel		<- function(n,s,t,x,y,m,u){if(x==m){xI<-1}else{xI<-0};if(y==m){yI<-1}else{yI<-0};if(max(xI,yI)==1){delT<-2}else{delT<-1};if(m>max(x,y)){x<--x;y<--y;m<--m;u<--u};if(max(x-u,y-u,m-x,m-y)>=0){out<-0};if(delT==1){out<-eagamma_cpp(n,s,t,x,y,m,u)/(1-exp(-2*(x-m)*(y-m)/(t-s)))};if(delT==2){if(xI*yI==0){xoy<-max(x,y);out<-eadel2_cpp(n,s,t,m,xoy,u)}else{out<-0}};if(out<0){out<-0};if(out>1){out<-1};if((t-s)==0){out <- 1}; out}
 
+# MP 1/18
 eadelR		<- function(n,s,t,x,y,m,u){if(x==m){xI<-1}else{xI<-0};if(y==m){yI<-1}else{yI<-0};if(max(xI,yI)==1){delT<-2}else{delT<-1};if(m>max(x,y)){x<--x;y<--y;m<--m;u<--u};if(max(x-u,y-u,m-x,m-y)>=0){out<-0};if(delT==1){out<-eagamma(n,s,t,x,y,m,u)/(1-exp(-2*(x-m)*(y-m)/(t-s)))};if(delT==2){if(xI*yI==0){xoy<-max(x,y);out<-eadel2(n,s,t,m,xoy,u)}else{out<-0}};if(out<0){out<-0};if(out>1){out<-1};if((t-s)==0){out <- 1}; out}
 
+# MP 1/18
 eadelC 		<- function(mt,s,t,x,y,m,u){if(mt>=mpfrthr){pbn<-mt*mpfrpbn;s<-mpfr(s,precBits=pbn);t<-mpfr(t,precBits=pbn);x<-mpfr(x,precBits=pbn);y<-mpfr(y,precBits=pbn);m<-mpfr(m,precBits=pbn);u<-mpfr(u,precBits=pbn);c(s1=eadelR(mt,s,t,x,y,m,u),s2=eadelR(mt+1,s,t,x,y,m,u))}else{eadel_pair_cpp(mt,s,t,x,y,m,u);}}
 
 #############################################
 #### 2.1.2 - Simulate Bessel 3 Process Mid Points - See Pollock (PhD Thesis, 2013)
 #############################################
 
+# MP 1/18
 eabesmid	<- function(q,s,tau,t,x,m,y,minI){
 	if(minI==-1){x<--x;y<--y;m<--m} # Reflection
     bI<-0;if(q==s){bI<-1;w<-x};if(q==tau){bI<-1;w<-m};if(q==t){bI<-1;w<-y} # Boundary
@@ -153,6 +174,8 @@ eabesmid	<- function(q,s,tau,t,x,m,y,minI){
 ##### 2.1.3 - Bessel Exceedance Evaluation - See Pollock (PhD Thesis, 2013)
 #############################################
 
+
+# MP 1/18
 eabesex		<- function(sV,tV,xV,yV,m,B1,B2,minI){ # Vectors of equal length
     if(minI==-1){xV<--xV;yV<--yV;m<--m;B1<--B1;B2<--B2}
     u <- runif(1,0,1); mt<-ceiling(max(sqrt(max(tV-sV)+(B1-m)^2)/(2*(B1-m)),sqrt(max(tV-sV)+(B2-m)^2)/(2*(B2-m))))
@@ -174,11 +197,14 @@ eabesex		<- function(sV,tV,xV,yV,m,B1,B2,minI){ # Vectors of equal length
 ##### 2.2.1 - Optimal rejection sampler specification
 #############################################
 
+# ????
 t.opt <- 0.64; p.opt <- 0.57810262346829443; q.opt <- 0.422599094; rat.opt <- p.opt/(p.opt+q.opt)
 
 #############################################
 ##### 2.2.2 - Proposal and rejection sampler
 #############################################
+
+# ????
 
 dev.pr		<- function(Jst.t=t.opt,Jst.rat=rat.opt){ # First Hitting Time (J*) Proposal Function
 	U <- runif(1,0,1) # Simulate uniform
@@ -187,6 +213,8 @@ dev.pr		<- function(Jst.t=t.opt,Jst.rat=rat.opt){ # First Hitting Time (J*) Prop
     }else{ # Case 2, U >= p/(p+q)
     repeat{E <- rexp(2,1); if(E[1]^2 <= 2*E[2]/Jst.t){X <- Jst.t/(1+Jst.t*E[1])^2; break}}}
     list(X=X,U=U,E=E)}
+
+# ????
 
 dev.rej		<- function(X){ # First Hitting Time (J*) Rejection Sampler
 	S <- pi*exp(-pi^2*X/8)/2; n <- 0; Y <- runif(1,0,1)*S # Initialise sequence and simulate Uniform
@@ -198,6 +226,8 @@ dev.rej		<- function(X){ # First Hitting Time (J*) Rejection Sampler
 #############################################
 ##### 2.2.3 - First Hitting Time (J*) Simulation
 #############################################
+
+# ????
 
 bm.pass		<- function(s=0,x=0,theta=1,Jst.t=t.opt,Jst.rat=rat.opt){ # theta denotes passage level
 	repeat{sim <- dev.rej(dev.pr()$X); if(sim$Acc==1){break}}
@@ -211,6 +241,8 @@ bm.pass		<- function(s=0,x=0,theta=1,Jst.t=t.opt,Jst.rat=rat.opt){ # theta denot
 #############################################
 ##### 2.3.1 - Initialisation of first passage times
 #############################################
+
+# ????
 
 p.path.init     <- function(s,x,theta,dimen,Jst.t=t.opt,Jst.rat=rat.opt){ # x and theta are d-dimensional vectors
     passage <- matrix(0,dimen,6); colnames(passage) <- c("dimen","tau","y","minI","l","u") # d-dimensional storage vector
@@ -458,7 +490,6 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tra
 #############################################
 
 ### theta <- NULL; prev.simn <- NULL; x.init <- NULL; T.start <- 0; theta <- NULL; phi.record <- FALSE; ess.thresh <- 0.5
-
 
 scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
     #################
