@@ -618,7 +618,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.tran
 #############################################
 #### 4.3 - Scale Algorithm - Select Exact / Approximate (Approxmate is default)
 #############################################
-scale <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale_version=scale_approx){scale_version(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=T.start,x.init=x.init,ss.size=ss.size,ess.thresh=ess.thresh,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,prev.simn=prev.simn,progress.check=progress.check,phi.record=phi.record,resamp.freq=resamp.freq,theta=theta,p.path.renew=p.path.renew)}
+#scale <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew,scale_version=scale_approx){scale_version(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,transform,un.transform,T.start=T.start,x.init=x.init,ss.size=ss.size,ess.thresh=ess.thresh,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,prev.simn=prev.simn,progress.check=progress.check,phi.record=phi.record,resamp.freq=resamp.freq,theta=theta,p.path.renew=p.path.renew)}
 
 #############################################
 #############################################
@@ -665,9 +665,9 @@ scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.tim
 #### 6 - Extend existing scale algorithm
 #############################################
 #############################################
-scale_extend <- function(prev.simn,t.inc,T.extend,scale_version){
+scale_extend <- function(prev.simn,t.inc,T.extend){
     ### Extend current simulation
-    new.simn <- scale_version(p.num=p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,transform=transform,un.transform=un.transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
+    new.simn <- scale_exact(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,transform=transform,un.transform=un.transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
     ### Append simulation
     append.len          <- length(new.simn$anc.times)-1 # Compute the number of additional mesh points to be added and
     if(append.len>=1){ # append if there are one or more
