@@ -38,12 +38,12 @@ ss.size     <- 10 #spec.mat[2,taskid]
 
 
 ### SCALE _LOGISTIC NOT CURRENTLY EXECUTABLE
-scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.1,T.extend=0.1,T.fin=100000,ss.size=10,ss.on=TRUE,seed.default=1){
+scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.1,T.extend=0.1,run.length=100000,ss.size=10,ss.on=TRUE,seed.default=1){
     set.seed(seed.default)
     time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,transform,un.transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
     save(file=fnm,simn=simn,time.elapse=time.elapse); print(time.elapse)
     
-    while(time.elapse < T.fin){time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend))[3]
+    while(simn$T.fin < run.length){time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend))[3]
     time.elapse <- time.elapse + time.inc
         save(file=fnm,simn,time.elapse); print(time.elapse)}
 
