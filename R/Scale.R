@@ -241,14 +241,11 @@ ac.phi          <- function(eta.pos,dapts){
 #############################################
 
 ss.phi          <- function(eta.pos,dapts,ss.size){
-    #ss.phi          <- function(eta.pos,dapts){
     beta.pos <- un.scale.transform(eta.pos); factor <- dsz/ss.size # Specify beta position and factor
-    #beta.pos <- un.scale.transform(eta.pos); factor <- dsz/scale::ss.size # Specify beta position and factor
     data1 <- data.eval(beta.pos,dapts[1,,"dapt.1"],factor=factor); data1.star <- data.eval(beta.star,dapts[1,,"dapt.1"],factor=factor) # Evaluate data grad log and lap log (ss 1)
     data2 <- data.eval(beta.pos,dapts[1,,"dapt.2"],factor=factor); data2.star <- data.eval(beta.star,dapts[1,,"dapt.2"],factor=factor) # Evaluate data grad log and lap log (ss 2)
     data3 <- data.eval(beta.pos,dapts[1,,"dapt.3"],factor=factor); data3.star <- data.eval(beta.star,dapts[1,,"dapt.3"],factor=factor) # Evaluate data grad log and lap log (ss 3)
     ((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data3$lap.log.pi)-sum(data3.star$lap.log.pi) + alpha.cent.sq + alpha.p.cent)/2}
-#((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*scale::alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data3$lap.log.pi)-sum(data3.star$lap.log.pi) + scale::alpha.cent.sq + scale::alpha.p.cent)/2}
 
 #############################################
 #### 3.3 - TURN OFF THE SUB SAMPLER (REQUIRES SETTING ss.on <- FALSE)

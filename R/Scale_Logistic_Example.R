@@ -103,7 +103,6 @@ phi.cent <<- 0.4088625
 
 #### 2.1.1 - Precompute the most extreme data values
 
-library(gtools)
 extrema.design  <- rbind(cbind(1,permutations(n=2,r=dimen-1,v=c(-design.thresh,design.thresh),repeats.allowed=TRUE)),cbind(1,permutations(n=2,r=dimen-1,v=c(-design.thresh,design.thresh),repeats.allowed=TRUE)))
 extrema.size <- dim(extrema.design)[1]
 data.extrema <- matrix(c(rep(0,extrema.size/2),rep(1,extrema.size/2)),extrema.size,1)

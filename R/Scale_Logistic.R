@@ -29,8 +29,4 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.1,T.e
 #scale_zero.wei - SCALE FILE
 #p.path.renew - SCALE FILE
 #run.length - function
-# alpha.cent - Data
-# alpha.cent.sq - Data
-# alpha.p.cent - Data
-# phi.cent - Data
-# Data
+
