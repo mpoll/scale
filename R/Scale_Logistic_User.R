@@ -20,7 +20,7 @@ user.logistic.example   <- function(){
 #############################################
 
 examp.design <- matrix(0,40,5); examp.design[,2:5] <- rnorm(160)
-examp.data   <- rbinom(160)
+examp.data   <- rbinom(160,1,0.5)
 beta.star    <- c(1,1,-1,2,-2) # What is the choosen centering value in the original space
 
 if(exists("dsz")==FALSE){dsz <<- dim(examp.design)[1]}     # Size of data set
@@ -109,6 +109,35 @@ data.precompute <- array(0,c(extrema.size,dimen,dimen,2)); for(i in 1:extrema.si
 dim.grad.max  <- array(0,c(dimen,dimen,2)); for(dim.j in 1:dimen){for(dim.k in 1:dimen){
     dim.grad.max[dim.j,dim.k,1] <- max(data.precompute[,dim.j,dim.k,1])     # Maximal Gradient Log Likelihood
     dim.grad.max[dim.j,dim.k,2] <- max(data.precompute[,dim.j,dim.k,2])}}   # Maximal Laplacian Log Likelhood
+
+datum.max.loglike <- function(design.row,datum)
+datum.max.laplike <- function(design.row,datum)
+
+
+data.extrema         <- function(){
+    #### .1 - Precompute the most extreme data values
+    if(exists("design.thresh")==TRUE){if(length(design.thresh)==1){design.min <- c(1,rep(-design.thresh,dimen-1)); design.max <- c(1,rep(design.thresh,dimen-1))}}
+    if(exists("design.thresh")==FALSE){design.min <- apply(examp.design,2,min); design.max <- apply(examp.design,2,max)}
+    extrema.design <- permutations(n=2,r=dimen,v=c(0,1),repeats.allowed=TRUE); for(i in 1:dimen){extrema.design[,i] <- (1-extrema.design[,i])*design.min[i] + extrema.design[,i]*design.max[i]}; extrema.design <- rbind(extrema.design,extrema.design)
+    extrema.size <- dim(extrema.design)[1]
+    data.extrema <- matrix(c(rep(0,extrema.size/2),rep(1,extrema.size/2)),extrema.size,1)
+    
+    #### .2 - Precompute the maxima Gradient Datum Log likelihood and Gradient Laplacian Datum Log likelihood for each datum
+    data.precompute <- array(0,c(extrema.size,dimen,dimen,2)); for(i in 1:extrema.size){for(dim.j in 1:dimen){
+        X.row <- extrema.design[i,] # Determine row of design matrix
+        data.precompute[i,1:dimen,dim.j,1] <- abs(-n.sigma[dim.j,dim.j]*diag(n.sigma)*X.row[dim.j]*X.row)/4 # maxima Gradient Datum Log likelihood
+        data.precompute[i,1:dimen,dim.j,2] <- abs(-(n.sigma[dim.j,dim.j])^2*diag(n.sigma)*(X.row[dim.j])^2*X.row)*1/(6*sqrt(3))}} # Maxima Gradient Laplacian Datum Log likelihood
+    
+    #### .3 - Precompute the maxima Gradient Datum Log likelihood and Laplacian Datum Log likelihood over all data
+    dim.grad.max  <- array(0,c(dimen,dimen,2)); for(dim.j in 1:dimen){for(dim.k in 1:dimen){
+        dim.grad.max[dim.j,dim.k,1] <- max(data.precompute[,dim.j,dim.k,1])     # Maximal Gradient Log Likelihood
+        dim.grad.max[dim.j,dim.k,2] <- max(data.precompute[,dim.j,dim.k,2])}}   # Maximal Laplacian Log Likelhood
+    
+    #### .4 - Write to global scope dim.grad.max
+    dim.grad.max <<- dim.grad.max
+}
+
+
 
 #############################################
 #### 2.2 - Subsampling Phi Intensity
