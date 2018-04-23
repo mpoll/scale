@@ -240,12 +240,29 @@ ac.phi          <- function(eta.pos,dapts){
 #### 3.2 - Actual Subsample Phi Specification
 #############################################
 
+##### 3.2.1 - Subsample Phi evaluation
+
 ss.phi          <- function(eta.pos,dapts,ss.size){
     beta.pos <- un.scale.transform(eta.pos); factor <- dsz/ss.size # Specify beta position and factor
     data1 <- data.eval(beta.pos,dapts[1,,"dapt.1"],factor=factor); data1.star <- data.eval(beta.star,dapts[1,,"dapt.1"],factor=factor) # Evaluate data grad log and lap log (ss 1)
     data2 <- data.eval(beta.pos,dapts[1,,"dapt.2"],factor=factor); data2.star <- data.eval(beta.star,dapts[1,,"dapt.2"],factor=factor) # Evaluate data grad log and lap log (ss 2)
     data3 <- data.eval(beta.pos,dapts[1,,"dapt.3"],factor=factor); data3.star <- data.eval(beta.star,dapts[1,,"dapt.3"],factor=factor) # Evaluate data grad log and lap log (ss 3)
     ((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data3$lap.log.pi)-sum(data3.star$lap.log.pi) + alpha.cent.sq + alpha.p.cent)/2}
+
+##### 3.2.2 - Subsampling Phi intensity bounds
+
+ss.phiC         <- function(p.mat.curr,l.bound=NULL,u.bound=NULL){ # Function of current particle location, lower bounds (dimensionally), upper bounds (dimensionally)
+    l.bds <- pmin(0,l.bound); u.bds <- pmax(0,u.bound) # Extend the hyper cube to the origin (i.e. eta.star)
+    distance <- pmax(abs(l.bds),abs(u.bds))            # Compute the maximal distance in each dimension
+    alpha.bds <- alpha.prime.bds <- numeric(dimen); for(j in 1:dimen){ # Compute the bounds for alpha and alpha prime
+        alpha.bds[j]        <- dsz*sum(distance*dim.grad.max[j,,1]) # alpha bounds
+        alpha.prime.bds[j]  <- dsz*sum(distance*dim.grad.max[j,,2]) # alpha prime bounds
+    }
+    A.bds   <- alpha.bds^2 # Compute bounds on alpha^2
+    phi.bds <- (sum(2*abs(alpha.cent)*alpha.bds)+sum(A.bds)+sum(alpha.prime.bds))/2 # Compute bounds (modulo normalisation) on subsampled phi
+    phiL <- phi.cent - phi.bds; phiU <- phi.cent + phi.bds; intensity <- phiU - phiL # Compute Bounding functionals and intensity
+    list(distance=distance,alpha.bds=alpha.bds,alpha.prime.bds=alpha.prime.bds,A.bds=A.bds,phiL=phiL,phiU=phiU,intensity=intensity)}
+
 
 #############################################
 #### 3.3 - TURN OFF THE SUB SAMPLER (REQUIRES SETTING ss.on <- FALSE)
