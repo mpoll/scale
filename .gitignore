@@ -31,3 +31,11 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+
+\.DS_Store
+
+src/RcppExports\.o
+
+src/scale_rcpp\.o
+
+src/scale\.so
