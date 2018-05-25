@@ -1,7 +1,7 @@
 ############################################
 ############################################
 ######       Scale Algorithm         #######
-######  Last Updated: 18/04/2018 MP  #######
+######  Last Updated: 30/05/2018 MP  #######
 ############################################
 ############################################
 
@@ -588,6 +588,133 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,u
     ########################
     list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale.transform=scale.transform,un.scale.transform=un.scale.transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
 
+### Modified version of Scale with Theta specification using global assignment
+
+scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,un.scale.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
+    #################
+    #### (0)1 #### Initalise Algorithm
+    #################
+    ##### (0)1.1 #### Define dimension and other variables not pre-defined in input
+    p.mu <- matrix(c(rep(0,dimen)),ncol=1,dimnames=list(sprintf("dim.%i",1:dimen),"mean")); p.covar <- diag(dimen); dimnames(p.covar) <- list(sprintf("dim.%i",1:dimen),sprintf("dim.%i",1:dimen)) # Specify algorithm dimension and Normal covariance matrix
+    if(is.null(theta)){theta <- rep(signif(dimen^(1/4)*sqrt(t.inc)*(colMeans(dim.grad.max[,,1])^(-1)/max(colMeans(dim.grad.max[,,1])^(-1))),digits=1),dimen)} # Specify theta
+    ##### (0)1.2 Initialise particle storage framework
+    if(is.null(prev.simn)==TRUE){ #i.e. starting algorithm from 0
+        ### Algorithm initialisation point
+        if(is.null(x.init)==TRUE){p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{
+            if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
+            if(dim(x.init)[2]==1){x.init <- matrix(rep(x.init,p.num),dimen,p.num)} # If x.init is a point then repeat
+            p.mat <- apply(x.init,2,scale.transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
+        } # Setting of p.mat depending on x.init NULL, d dimn vector, dxp dimn vector, 1xd matrix or pxd matrix
+        ### Define storage matrices
+        p.idx <- 1:p.num; log.p.wei <- rep(log(1/p.num),p.num) # Set idxs and weights
+        p.layer <- matrix(0,9,p.num,dimnames=list(c("c.idx","s","deg.s","t","tau.bar","next.ev","PhiL","PhiU","Delta"),NULL)) # Establish particle layer matrix
+        p.layer["c.idx",] <- p.idx # Set particle idxs in layer matrix
+        p.dapts <- array(sample(dsz,3*p.num*ss.size,replace=TRUE),c(p.num,ss.size,3),dimnames=list(sprintf("part.%i",1:p.num),sprintf("ss.%i",1:ss.size),sprintf("dapt.%i",1:3))) # Set p.layer data points
+        p.pass.arr <- p.cyc.arr <- array(0,c(dimen,6,p.num),dimnames=list(NULL,c("dimen","tau","y","minI","l","u"),sprintf("part.%i",1:p.num))) # Define particle passage and cyclic arrays
+        for(i in 1:p.num){p.taus <- p.path.init(s=T.start,x=p.mat[,i],theta=theta,dimen=dimen); p.pass.arr[,,i] <- p.taus$pass.mat; p.cyc.arr[,,i] <- p.taus$cyc.mat} # Initialise particle first passage times
+        p.layer["tau.bar",] <- p.cyc.arr[1,"tau",] # Determine each particles tau.bar
+    }else{ #i.e. restarting algorithm from some point
+        T.start <- prev.simn$T.fin; p.idx <- prev.simn$p.idx; log.p.wei <- prev.simn$log.p.wei; p.mat <- prev.simn$p.mat; p.layer <- prev.simn$p.layer; p.dapts <- prev.simn$p.dapts; p.pass.arr <- prev.simn$p.pass.arr; p.cyc.arr <- prev.simn$p.cyc.arr} # Restablish Algorithm
+    ##### (0)1.3 Initialise particle system
+    for(i in 1:p.num){p.phi.bds <- ss.phiC(p.mat[,i],p.pass.arr[,"l",i],p.pass.arr[,"u",i]); p.layer[c("PhiL","PhiU"),i]<-c(p.phi.bds$phiL,p.phi.bds$phiU)}; p.layer[c("Delta"),] <- p.layer["PhiU",] - p.layer["PhiL",] # Set p.layer current particle intensity
+    p.bet.degrad.r <- p.bet.degrad <- numeric(p.num) # Initialise between resampling log weight degration
+    p.layer["s",] <- p.layer["deg.s",] <- T.start # Initialise algorithms start point
+    p.layer["t",] <- p.layer["deg.s",] + rexp(p.num,rate=p.layer["Delta",]) # Set p.layer next event times
+    p.layer["next.ev",] <- (sign(p.layer["tau.bar",]-p.layer["t",])+1)/2; p.layer["next.ev",] <- p.layer["next.ev",]*p.layer["t",] + (1-p.layer["next.ev",])*p.layer["tau.bar",] # For each particle determine whether a tau.bar or poisson event time occurs next and at what time
+    ##### (0)1.4 Initialise particle ancestral storage framework
+    p.anc.idx <- matrix(p.idx,1,p.num,dimnames=list(NULL,sprintf("pos.%i",1:p.num))); p.anc.wei <- matrix(part.normal(log.p.wei)$p.wei,1,p.num,dimnames=list(NULL,sprintf("part.%i",1:p.num)));  p.anc.mat <- array(p.mat,c(dimen,p.num,1),dimnames=list(sprintf("dim.%i",1:dimen),sprintf("part.%i",1:p.num),NULL)) # Ancestral recording
+    p.phi.hist <- matrix(0,0,dimen+1,dimnames=list(NULL,c("ss.phi",sprintf("dim.%i",1:dimen)))); p.anc.resamp <- numeric(0); p.anc.ess <- numeric(0); p.anc.neg <- matrix(0,0,5,dimnames=list(NULL,c("event.ch","wt-","t","PhiL","PhiU"))) # Diagnostic ancestral recording
+    ##### (0)1.5 Sort p.layer matrix
+    p.layer <- mat.sort.r(p.layer,p.num,"next.ev") # Sort p.layer matrix by next event time
+    ######################
+    #### (t.inc) #### LOOP
+    ######################
+    ##### (t.inc)2 #### Define loop stopping criteria
+    ######################
+    anc.times <- curr.deg.time <- T.start; t.inc.next <- T.start + t.inc; resamp.counter <- 1 # Initialise current degradation time, time of first increment and resampling counter
+    while(curr.deg.time < T.fin){ # Iterate until final time is reached
+        ##### (t.inc)2.1 ##### Increment particle set to next event time
+        ######################
+        if(p.layer["next.ev",1] >= t.inc.next){ # If we have reached the next increment point
+            ###### (t.inc)2.2.a.1 ##### Compute particles at intermediate time point
+            p.layer <- mat.sort.r(p.layer,p.num,"c.idx") # Sort p.layer matrix by current particle index
+            for(loc.up in 1:p.num){p.mat[,loc.up]<-p.path.renew(pass.mat=p.pass.arr[,,loc.up],cyc.mat=p.cyc.arr[,,loc.up],curr.time=p.layer["s",loc.up],x.curr=p.mat[,loc.up],next.time=t.inc.next,theta,dimen)$x.next}
+            ###### (t.inc)2.2.a.2 ##### Update particle weights
+            p.bet.degrad[p.layer[c("c.idx"),]] <- p.bet.degrad[p.layer[c("c.idx"),]] + (p.curr["deg.s"]-p.layer["deg.s",])*p.layer["PhiL",] # Find full particle between resampling degradation matrix
+            log.p.wei <- log.p.wei - p.bet.degrad # Update weight of particles due to weight degradation to mesh point
+            ###### (t.inc)2.2.a.3 ##### Append increment to ancesotral recording
+            anc.times <- c(anc.times,t.inc.next) # Record time of resampling
+            p.anc.idx <- rbind(p.anc.idx,p.idx); p.idx <- 1:p.num # Append indices and resent current indices
+            p.normalise <- part.normal(log.p.wei); log.p.wei <- p.normalise$log.p.wei; p.anc.wei <- rbind(p.anc.wei,p.normalise$p.wei) # Control, normalise log weights and append normalised weights
+            p.anc.mat <- abind(p.anc.mat,array(p.mat,c(dimen,p.num,1)),along=3) # Append increment to ancestoral recording
+            ###### (t.inc)2.2.a.4 ##### Update particle system
+            curr.deg.time <- t.inc.next # Index left hand time point and current time
+            p.layer["deg.s",] <- p.layer["s",] <- curr.deg.time  # Index left hand time point and current time
+            t.inc.next <- min(curr.deg.time + t.inc, T.fin) # Index increment time
+            ###### (t.inc)2.2.a.5 ##### Resample
+            p.resamp <- scale_resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=1,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=p.pass.arr,p.cyc.arr=p.cyc.arr) # Resample particles
+            p.anc.ess <- c(p.anc.ess,p.resamp$ess) # Record ancestoral ESS at mesh point
+            p.idx <- p.resamp$p.idx; log.p.wei <- p.resamp$log.p.wei # Update particle indicies and weights (normalised)
+            if(p.resamp$resamp.I==1){p.anc.resamp <- c(p.anc.resamp,curr.deg.time); p.mat <- p.resamp$p.mat; p.layer <- p.resamp$p.layer; p.dapts <- p.resamp$p.dapts; p.pass.arr <- p.resamp$p.pass.arr; p.cyc.arr <- p.resamp$p.cyc.arr} # If there has been resampling, update ancestral resampling times, layer, dapts and cycling arrays
+            p.layer <- mat.sort.r(p.layer,p.num,"next.ev") # Redefine storage vectors II
+            resamp.counter <- 1 # Reset resample counter
+            if(progress.check==TRUE){print(curr.deg.time)} # Output current time if checking progress
+        }else{ # If we haven't reached the next increment point
+            ###### (t.inc)2.2.b.1 ##### Select particle to be updated
+            p.curr <- p.layer[,1] # Next particle to be updated
+            p.curr.idx <- p.curr["c.idx"] # Define current index
+            p.curr.dapts <- p.dapts[p.curr.idx,,,drop=FALSE] # Find particle subsampled data points
+            ###### (t.inc)2.2.b.2 ##### Update particle trajectory
+            traj.update <- p.path.renew(pass.mat=p.pass.arr[,,p.curr.idx],cyc.mat=p.cyc.arr[,,p.curr.idx],curr.time=p.curr["s"],x.curr=p.mat[,p.curr.idx],next.time=p.curr["next.ev"],theta,dimen) # Iterate passage matrix
+            p.mat[,p.curr.idx] <- p.loc.next <- traj.update$x.next # Particle location at next.ev
+            ###### (t.inc)2.2.b.3 ##### If particle to be updated has an event before the next tau.bar, then update to Poisson event time
+            if(p.curr["t"]<=p.curr["tau.bar"]){
+                ###### (t.inc)2.2.b.3.1 ##### Update data set
+                p.dapts[p.curr.idx,,] <- sample(dsz,3*ss.size,replace=TRUE) # Update particle data points
+                ###### (t.inc)2.2.b.3.2 ##### Update Poisson weight
+                p.phi.eval <- ss.phi(p.loc.next,p.curr.dapts,ss.size)
+                p.event.ch <- (p.curr["PhiU"] - p.phi.eval)/p.curr["Delta"]; if(phi.record==TRUE){p.phi.hist <- rbind(p.phi.hist,c(p.phi.eval,p.loc.next))} # Raw Poisson event increment
+                if(p.event.ch < 0){p.neg <- neg.wei.mech(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up); log.p.wei[p.curr.idx] <- -Inf; p.anc.neg <- rbind(p.anc.neg,p.neg$p.anc.neg.append); ss.phiC <- p.neg$ss.phiC}else{log.p.wei[p.curr.idx] <- log.p.wei[p.curr.idx] + log(p.event.ch)} # Apply chosen negative weight mechanism
+            }else{
+                ###### (t.inc)2.2.b.4 ##### If particle to be updated has no event before the next tau.bar, then update passage trajectory
+                p.pass.arr[,,p.curr.idx] <- traj.update$pass.mat; p.cyc.arr[,,p.curr.idx] <- traj.update$cyc.mat # Update pass.mat and cyc.mat
+                p.curr["tau.bar"] <- traj.update$next.tau # Determine next particle passage time
+            }
+            ###### (t.inc)2.2.b.5 ##### Update particle degradation matrix
+            p.bet.degrad[p.curr.idx] <- p.bet.degrad[p.curr.idx] + (p.curr["next.ev"]-p.curr["deg.s"])*p.curr[c("PhiL")] # Record individual particle degradation (since last resampling point)
+            ###### (t.inc)2.2.b.6 ##### Update particle Poisson intensity
+            p.phi.bds <- ss.phiC(p.loc.next,p.pass.arr[,"l",i],p.pass.arr[,"u",i]); p.curr[c("PhiL","PhiU")] <- c(p.phi.bds$phiL,p.phi.bds$phiU); p.curr["Delta"] <- p.curr["PhiU"] - p.curr["PhiL"] # Update phi bounds and intensity
+            ###### (t.inc)2.2.b.7 ##### Update particle event times and layer set
+            p.curr["s"] <- p.curr["deg.s"] <- p.curr["next.ev"] # Update current particle degradation time
+            p.curr["t"] <- p.curr["next.ev"] + rexp(1,rate=p.curr["Delta"]) # Update current particle Poisson event time
+            p.curr["next.ev"] <- min(p.curr["tau.bar"],p.curr["t"]) # Determine next particle event time
+            p.layer <- ins.sort.r(p.curr,p.layer[,-1,drop=FALSE],p.num-1,"next.ev") # Re-insert particle into p.layer
+            ###### (t.inc)2.2.b.8 ##### Resample
+            if(resamp.counter%%(resamp.freq)==0){ # Resample if resample counter sufficient
+                ### Update particle degradation matrix and aggregate weight degradation
+                p.bet.degrad[p.layer[c("c.idx"),]] <- p.bet.degrad[p.layer[c("c.idx"),]] + (p.curr["deg.s"]-p.layer["deg.s",])*p.layer["PhiL",] # Find full particle between resampling degradation matrix
+                log.p.wei <- log.p.wei - p.bet.degrad # Update weight of particle set due to weight degradation to event time
+                ### Update current degradation time, update p.layer and resent particle degradation matrix
+                p.layer["deg.s",] <- curr.deg.time <- p.curr["deg.s"] # Index current degradation time
+                p.bet.degrad <- p.bet.degrad.r  # Reset particle between resampling degradation matrix
+                ### Resample
+                p.resamp <- scale_resamp(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I=0,p.dapts,ss.size,resamp.method,ess.thresh,p.pass.arr=p.pass.arr,p.cyc.arr=p.cyc.arr) # Resample particles
+                p.idx <- p.resamp$p.idx; log.p.wei <- p.resamp$log.p.wei # Update particle indicies and weights (normalised)
+                if(p.resamp$resamp.I==1){p.anc.resamp <- c(p.anc.resamp,curr.deg.time); p.mat <- p.resamp$p.mat; p.layer <- p.resamp$p.layer; p.dapts <- p.resamp$p.dapts; p.pass.arr <- p.resamp$p.pass.arr; p.cyc.arr <- p.resamp$p.cyc.arr} # If there has been resampling, update ancestral resampling times, layer and dapts
+            } # Close reasampling if statement
+            ###### (t.inc)2.2.b.4 ##### Resample Counter Index
+            resamp.counter <- resamp.counter + 1 # Index resample counter
+            ###### (t.inc)2.2.c ##### Close loop
+        } # Close particle set increment loop
+        ###### (t.inc)2.3 ##### Close loop
+        #######################
+    } # Close time increment loop
+    ########################
+    #### (T.fin) #### Output
+    ########################
+    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale.transform=scale.transform,un.scale.transform=un.scale.transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
+
+
 #############################################
 #############################################
 #### 5 - Scale Ergodic Extraction
@@ -651,3 +778,6 @@ scale_extend <- function(prev.simn,t.inc,T.extend){
     }else{ # Case where no simulation takes place - output prev.simn information
         p.anc.idx <- prev.simn$p.anc.idx;p.anc.wei <- prev.simn$p.anc.wei; p.anc.mat <- prev.simn$p.anc.mat; p.anc.resamp <- prev.simn$p.anc.resamp; p.anc.ess <- prev.simn$p.anc.ess; p.phi.hist <- prev.simn$p.phi.hist; p.anc.neg <- prev.simn$p.anc.neg; anc.times <- prev.simn$anc.times}
     list(p.num=new.simn$p.num,p.idx=new.simn$p.idx,log.p.wei=new.simn$log.p.wei,p.mat=new.simn$p.mat,p.layer=new.simn$p.layer,theta=new.simn$theta,p.dapts=new.simn$p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=new.simn$resamp.freq,resamp.method=new.simn$resamp.method,neg.wei.mech=new.simn$neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=anc.times[1],t.inc=new.simn$t.inc,T.fin=new.simn$T.fin,dimen=new.simn$dimen,p.mu=new.simn$p.mu,ss.size=new.simn$ss.size,ess.thresh=new.simn$ess.thresh,ss.phi=new.simn$ss.phi,ss.phiC=new.simn$ss.phiC,p.cyc.arr=new.simn$p.cyc.arr,p.pass.arr=new.simn$p.pass.arr,scale.transform=prev.simn$scale.transform,un.scale.transform=prev.simn$un.scale.transform,progress.check=new.simn$progress.check,phi.record=new.simn$phi.record,p.path.renew=new.simn$p.path.renew)} # Output list
+
+
+
