@@ -2,7 +2,8 @@
 \alias{rare.logistic.example.2}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+A Variably-informative Logistic Regression Example
+  %%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

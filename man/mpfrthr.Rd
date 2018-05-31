@@ -2,7 +2,8 @@
 \alias{mpfrthr}
 \docType{data}
 \title{
-%%   ~~ data name/kind ... ~~
+  mpfrthr
+  %%   ~~ data name/kind ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of the dataset. ~~

@@ -2,7 +2,8 @@
 \alias{scale_logistic}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Apply the cale algorithm to a logistic regression problem.
+  %%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
