@@ -12,6 +12,5 @@ import(
     "MASS",
     "Rmpfr"
 )
-importFrom("stats", "aggregate", "rbinom", "rexp", "rnorm", "runif")
-
+importFrom("stats", "aggregate", "binomial", "glm", "rbinom", "rexp", "rnorm", "runif", "vcov")
 useDynLib("scale")
