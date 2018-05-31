@@ -1,19 +1,22 @@
-\name{un.transform}
-\alias{un.transform}
+\name{data.subset}
+\alias{data.subset}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-un.transform(eta.pos)
+data.subset(datum.idx.start = 1, length.idxs = dsz)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{eta.pos}{
-%%     ~~Describe \code{eta.pos} here~~
+  \item{datum.idx.start}{
+%%     ~~Describe \code{datum.idx.start} here~~
+}
+  \item{length.idxs}{
+%%     ~~Describe \code{length.idxs} here~~
 }
 }
 \details{
@@ -47,9 +50,28 @@ un.transform(eta.pos)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (eta.pos) 
+function (datum.idx.start = 1, length.idxs = dsz) 
 {
-    matrix(c(diag(n.sigma) * eta.pos + beta.star), nrow = 1)
+    if (exists("examp.design") == FALSE) {
+        call.data <- datum(datum.idx.start)
+        subset.design <- t(as.matrix(call.data$x))
+        subset.data <- call.data$y
+        if (length.idxs > 1) {
+            for (i in (datum.idx.start + 1):(datum.idx.start + 
+                length.idxs - 1)) {
+                call.data <- datum(i)
+                subset.design <- rbind(subset.design, call.data$x)
+                subset.data <- c(subset.data, call.data$y)
+            }
+        }
+    }
+    if (exists("examp.design") == TRUE) {
+        subset.design <- examp.design[datum.idx.start:(datum.idx.start + 
+            length.idxs - 1), ]
+        subset.data <- examp.data[datum.idx.start:(datum.idx.start + 
+            length.idxs - 1)]
+    }
+    list(subset.design = subset.design, subset.data = subset.data)
   }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -1,19 +1,22 @@
-\name{datum}
-\alias{datum}
+\name{logistic.centering}
+\alias{logistic.centering}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-datum(datum.idx)
+logistic.centering(datum.idx.start = 1, length.idxs = dsz)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{datum.idx}{
-%%     ~~Describe \code{datum.idx} here~~
+  \item{datum.idx.start}{
+%%     ~~Describe \code{datum.idx.start} here~~
+}
+  \item{length.idxs}{
+%%     ~~Describe \code{length.idxs} here~~
 }
 }
 \details{
@@ -47,22 +50,18 @@ datum(datum.idx)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (datum.idx) 
+function (datum.idx.start = 1, length.idxs = dsz) 
 {
-    old.seed <- .Random.seed
-    on.exit({
-        .Random.seed <<- old.seed
-    })
-    seed.indexing <- datum.idx\%/\%2147483647
-    datum.seeding <- datum.idx\%\%2147483647
-    set.seed(datum.seeding)
-    runif((2 * dimen - 1) * seed.indexing)
-    datum.x <- c(1, rtnorm(dimen - 1, mean = 0, sd = 1, lower = -design.thresh, 
-        upper = design.thresh))
-    datum.z <- exp(sum(beta.truth * datum.x))
-    datum.y <- rbinom(1, 1, datum.z/(1 + datum.z))
-    list(idx = datum.idx, x = datum.x, y = datum.y, seed = datum.seeding, 
-        seed.idx = seed.indexing)
+    call.data <- data.subset(datum.idx.start, length.idxs)
+    subset.design.mat <- as.matrix(call.data$subset.design[, 
+        -1, drop = FALSE])
+    subset.data <- call.data$subset.data
+    subset.glm <- glm(formula = subset.data ~ subset.design.mat, 
+        family = binomial(link = "logit"))
+    center <- subset.glm$coef
+    precon <- vcov(subset.glm)
+    list(center = center, precon = precon, precon.inv = solve(precon), 
+        logistic.glm = subset.glm, det.metric = det(precon))
   }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

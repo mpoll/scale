@@ -1,19 +1,19 @@
-\name{transform}
-\alias{transform}
+\name{un.scale.transform}
+\alias{un.scale.transform}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-transform(beta.pos)
+un.scale.transform(eta.pos)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{beta.pos}{
-%%     ~~Describe \code{beta.pos} here~~
+  \item{eta.pos}{
+%%     ~~Describe \code{eta.pos} here~~
 }
 }
 \details{
@@ -47,9 +47,9 @@ transform(beta.pos)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (beta.pos) 
+function (eta.pos) 
 {
-    matrix(c(diag(n.sigma.inv) * (beta.pos - beta.star)), nrow = 1)
+    matrix(c(diag(n.sigma) * eta.pos + beta.star), nrow = 1)
   }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
