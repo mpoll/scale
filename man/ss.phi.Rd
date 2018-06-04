@@ -2,13 +2,14 @@
 \alias{ss.phi}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+SS.phi
+  %%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-ss.phi(eta.pos, dapts)
+ss.phi(eta.pos, dapts, ss.size)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +18,9 @@ ss.phi(eta.pos, dapts)
 }
   \item{dapts}{
 %%     ~~Describe \code{dapts} here~~
+}
+  \item{ss.size}{
+%%     ~~Describe \code{ss.size} here~~
 }
 }
 \details{
@@ -50,9 +54,9 @@ ss.phi(eta.pos, dapts)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (eta.pos, dapts) 
+function (eta.pos, dapts, ss.size) 
 {
-    beta.pos <- un.transform(eta.pos)
+    beta.pos <- un.scale.transform(eta.pos)
     factor <- dsz/ss.size
     data1 <- data.eval(beta.pos, dapts[1, , "dapt.1"], factor = factor)
     data1.star <- data.eval(beta.star, dapts[1, , "dapt.1"], 

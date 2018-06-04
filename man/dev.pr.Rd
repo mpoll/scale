@@ -2,13 +2,13 @@
 \alias{dev.pr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray Pollock...%%  ~~function to do ... ~~
+Dev.pr%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-dev.pr(Jst.t = t.opt, Jst.rat = rat.opt)
+dev.pr(Jst.t = 0.64, Jst.rat = 0.5776972)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -50,7 +50,7 @@ dev.pr(Jst.t = t.opt, Jst.rat = rat.opt)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (Jst.t = t.opt, Jst.rat = rat.opt) 
+function (Jst.t = 0.64, Jst.rat = 0.5776972) 
 {
     U <- runif(1, 0, 1)
     if (U < Jst.rat) {

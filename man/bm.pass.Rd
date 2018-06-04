@@ -2,13 +2,13 @@
 \alias{bm.pass}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+Brownian motion passage time%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-bm.pass(s = 0, x = 0, theta = 1, Jst.t = t.opt, Jst.rat = rat.opt)
+bm.pass(s = 0, x = 0, theta = 1, Jst.t = 0.64, Jst.rat = 0.5776972)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -59,7 +59,7 @@ bm.pass(s = 0, x = 0, theta = 1, Jst.t = t.opt, Jst.rat = rat.opt)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (s = 0, x = 0, theta = 1, Jst.t = t.opt, Jst.rat = rat.opt) 
+function (s = 0, x = 0, theta = 1, Jst.t = 0.64, Jst.rat = 0.5776972) 
 {
     repeat {
         sim <- dev.rej(dev.pr()$X)
