@@ -2,13 +2,13 @@
 \alias{p.path.init}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+P path init%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-p.path.init(s, x, theta, dimen, Jst.t = t.opt, Jst.rat = rat.opt)
+p.path.init(s, x, theta, dimen, Jst.t = 0.64, Jst.rat = 0.5776972)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -62,7 +62,7 @@ p.path.init(s, x, theta, dimen, Jst.t = t.opt, Jst.rat = rat.opt)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (s, x, theta, dimen, Jst.t = t.opt, Jst.rat = rat.opt) 
+function (s, x, theta, dimen, Jst.t = 0.64, Jst.rat = 0.5776972) 
 {
     passage <- matrix(0, dimen, 6)
     colnames(passage) <- c("dimen", "tau", "y", "minI", "l", 

@@ -2,13 +2,13 @@
 \alias{scale_extend}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+Scale extend%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-scale_extend(prev.simn, t.inc, T.extend, scale_version)
+scale_extend(prev.simn, t.inc, T.extend)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,9 +20,6 @@ scale_extend(prev.simn, t.inc, T.extend, scale_version)
 }
   \item{T.extend}{
 %%     ~~Describe \code{T.extend} here~~
-}
-  \item{scale_version}{
-%%     ~~Describe \code{scale_version} here~~
 }
 }
 \details{
@@ -56,11 +53,12 @@ scale_extend(prev.simn, t.inc, T.extend, scale_version)
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (prev.simn, t.inc, T.extend, scale_version) 
+function (prev.simn, t.inc, T.extend) 
 {
-    new.simn <- scale_version(p.num = p.num, t.inc = t.inc, T.fin = T.extend + 
-        prev.simn$T.fin, ss.phi = ss.phi, ss.phiC = prev.simn$ss.phiC, 
-        dimen = prev.simn$dimen, transform = transform, un.transform = un.transform, 
+    new.simn <- scale_exact(p.num = prev.simn$p.num, t.inc = t.inc, 
+        T.fin = T.extend + prev.simn$T.fin, ss.phi = ss.phi, 
+        ss.phiC = prev.simn$ss.phiC, dimen = prev.simn$dimen, 
+        scale.transform = scale.transform, un.scale.transform = un.scale.transform, 
         T.start = prev.simn$T.fin, ss.size = prev.simn$ss.size, 
         ess.thresh = prev.simn$ess.thresh, resamp.method = prev.simn$resamp.method, 
         neg.wei.mech = prev.simn$neg.wei.mech, prev.simn = prev.simn, 
@@ -103,7 +101,7 @@ function (prev.simn, t.inc, T.extend, scale_version)
         p.mu = new.simn$p.mu, ss.size = new.simn$ss.size, ess.thresh = new.simn$ess.thresh, 
         ss.phi = new.simn$ss.phi, ss.phiC = new.simn$ss.phiC, 
         p.cyc.arr = new.simn$p.cyc.arr, p.pass.arr = new.simn$p.pass.arr, 
-        transform = prev.simn$transform, un.transform = prev.simn$un.transform, 
+        scale.transform = prev.simn$scale.transform, un.scale.transform = prev.simn$un.scale.transform, 
         progress.check = new.simn$progress.check, phi.record = new.simn$phi.record, 
         p.path.renew = new.simn$p.path.renew)
   }

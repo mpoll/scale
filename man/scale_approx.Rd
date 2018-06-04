@@ -2,13 +2,13 @@
 \alias{scale_approx}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+Approximate implementation of scale algorithm%%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-scale_approx(p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, transform, un.transform, T.start = 0, x.init = NULL, ss.size = 1, ess.thresh = 0.5, resamp.method = resid.resamp, neg.wei.mech = scale_zero.wei, prev.simn = NULL, progress.check = FALSE, phi.record = FALSE, resamp.freq = p.num - 1, theta = NULL, p.path.renew = p.path.renew)
+scale_approx(p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, scale.transform, un.scale.transform, T.start = 0, x.init = NULL, ss.size = 1, ess.thresh = 0.5, resamp.method = resid.resamp, neg.wei.mech = scale_zero.wei, prev.simn = NULL, progress.check = FALSE, phi.record = FALSE, resamp.freq = p.num - 1, theta = NULL, p.path.renew = p.path.renew)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,11 +30,11 @@ scale_approx(p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, transform, un.transfor
   \item{dimen}{
 %%     ~~Describe \code{dimen} here~~
 }
-  \item{transform}{
-%%     ~~Describe \code{transform} here~~
+  \item{scale.transform}{
+%%     ~~Describe \code{scale.transform} here~~
 }
-  \item{un.transform}{
-%%     ~~Describe \code{un.transform} here~~
+  \item{un.scale.transform}{
+%%     ~~Describe \code{un.scale.transform} here~~
 }
   \item{T.start}{
 %%     ~~Describe \code{T.start} here~~
@@ -104,9 +104,9 @@ scale_approx(p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, transform, un.transfor
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, transform, 
-    un.transform, T.start = 0, x.init = NULL, ss.size = 1, ess.thresh = 0.5, 
-    resamp.method = resid.resamp, neg.wei.mech = scale_zero.wei, 
+function (p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, scale.transform, 
+    un.scale.transform, T.start = 0, x.init = NULL, ss.size = 1, 
+    ess.thresh = 0.5, resamp.method = resid.resamp, neg.wei.mech = scale_zero.wei, 
     prev.simn = NULL, progress.check = FALSE, phi.record = FALSE, 
     resamp.freq = p.num - 1, theta = NULL, p.path.renew = p.path.renew) 
 {
@@ -127,7 +127,7 @@ function (p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, transform,
             if (dim(x.init)[2] == 1) {
                 x.init <- matrix(rep(x.init, p.num), dimen, p.num)
             }
-            p.mat <- apply(x.init, 2, transform)
+            p.mat <- apply(x.init, 2, scale.transform)
             dimnames(p.mat) <- list(sprintf("dim.\%i", 1:dimen), 
                 NULL)
         }
@@ -218,7 +218,7 @@ function (p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, transform,
             p.curr.dapts <- p.dapts[p.curr.idx, , , drop = FALSE]
             p.loc.next <- p.mat[, p.curr.idx] + sqrt(p.curr["t"] - 
                 p.curr["s"]) * mvrnorm(1, p.mu, p.covar)
-            p.phi.eval <- ss.phi(p.loc.next, p.curr.dapts)
+            p.phi.eval <- ss.phi(p.loc.next, p.curr.dapts, ss.size)
             p.event.ch <- (p.curr["PhiU"] - p.phi.eval)/p.curr["Delta"]
             if (phi.record == TRUE) {
                 p.phi.hist <- rbind(p.phi.hist, c(p.phi.eval, 
@@ -280,8 +280,8 @@ function (p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, transform,
         anc.times = anc.times, T.start = T.start, t.inc = t.inc, 
         T.fin = T.fin, dimen = dimen, p.mu = p.mu, ss.size = ss.size, 
         ess.thresh = ess.thresh, ss.phi = ss.phi, ss.phiC = ss.phiC, 
-        p.cyc.arr = NULL, p.pass.arr = NULL, transform = transform, 
-        un.transform = un.transform, progress.check = progress.check, 
+        p.cyc.arr = NULL, p.pass.arr = NULL, scale.transform = scale.transform, 
+        un.scale.transform = un.scale.transform, progress.check = progress.check, 
         phi.record = phi.record, p.path.renew = p.path.renew)
   }
 }
