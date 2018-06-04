@@ -14,8 +14,8 @@ library(gtools); library(Rmpfr); library(statmod); library(abind); library(MASS)
 ########################################################################
 ########################################################################
 
-scale.transform       <- function(beta.pos){matrix(c(diag(n.sigma.inv)*(beta.pos-beta.star)),nrow=1)} # Transformation from beta to eta space
-un.scale.transform    <- function(eta.pos){matrix(c(diag(n.sigma)*eta.pos+beta.star),nrow=1)} # Transformation from eta to beta space
+scale_transform       <- function(beta.pos){matrix(c(diag(n.sigma.inv)*(beta.pos-beta.star)),nrow=1)} # Transformation from beta to eta space
+un_scale_transform    <- function(eta.pos){matrix(c(diag(n.sigma)*eta.pos+beta.star),nrow=1)} # Transformation from eta to beta space
 
 ########################################################################
 ########################################################################
@@ -179,7 +179,7 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.
     curr.seed <- .Random.seed
     save(file=fnm,dim.grad.max=dim.grad.max,alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent,curr.seed=curr.seed)
     # Run initial Scale run
-    time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,scale.transform,un.scale.transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
+    time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
     # Save current seed and current data
     curr.seed <- .Random.seed
     save(file=fnm,simn=simn,dim.grad.max=dim.grad.max,alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)
