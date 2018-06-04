@@ -233,7 +233,7 @@ p.path.renew <- function(pass.mat,cyc.mat,curr.time,x.curr,next.time,theta,dimen
 #############################################
 
 ac.phi          <- function(eta.pos,dapts){
-    beta.pos <- un.scale.transform(eta.pos); data.evaluation <- data.eval(beta.pos,1:dsz) # Specify beta position and evaluate data
+    beta.pos <- un_scale_transform(eta.pos); data.evaluation <- data.eval(beta.pos,1:dsz) # Specify beta position and evaluate data
     (data.evaluation$grad.log.pi%*%t(data.evaluation$grad.log.pi) + sum(data.evaluation$lap.log.pi))/2}
 
 #############################################
@@ -243,7 +243,7 @@ ac.phi          <- function(eta.pos,dapts){
 ##### 3.2.1 - Subsample Phi evaluation
 
 ss.phi          <- function(eta.pos,dapts,ss.size){
-    beta.pos <- un.scale.transform(eta.pos); factor <- dsz/ss.size # Specify beta position and factor
+    beta.pos <- un_scale_transform(eta.pos); factor <- dsz/ss.size # Specify beta position and factor
     data1 <- data.eval(beta.pos,dapts[1,,"dapt.1"],factor=factor); data1.star <- data.eval(beta.star,dapts[1,,"dapt.1"],factor=factor) # Evaluate data grad log and lap log (ss 1)
     data2 <- data.eval(beta.pos,dapts[1,,"dapt.2"],factor=factor); data2.star <- data.eval(beta.star,dapts[1,,"dapt.2"],factor=factor) # Evaluate data grad log and lap log (ss 2)
     data3 <- data.eval(beta.pos,dapts[1,,"dapt.3"],factor=factor); data3.star <- data.eval(beta.star,dapts[1,,"dapt.3"],factor=factor) # Evaluate data grad log and lap log (ss 3)
@@ -349,7 +349,7 @@ ss.phiC.up      <- function(p.phi,p.phiL,p.phiU){function(p.mat.curr){list(phiL=
 #### 4.1 - Scale Algorithm Approximate Version
 #############################################
 
-scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,un.scale.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
+scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
     #################
     #### (0)1 #### Initalise Algorithm
     #################
@@ -361,7 +361,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,
         if(is.null(x.init)==TRUE){p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{
             if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
             if(dim(x.init)[2]==1){x.init <- matrix(rep(x.init,p.num),dimen,p.num)} # If x.init is a point then repeat
-            p.mat <- apply(x.init,2,scale.transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
+            p.mat <- apply(x.init,2,scale_transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
         } # Setting of p.mat depending on x.init NULL, d dimn vector, dxp dimn vector, 1xd matrix or pxd matrix
         ### Define storage matrices
         p.idx <- 1:p.num; log.p.wei <- rep(log(1/p.num),p.num) # Set idxs and weights
@@ -456,7 +456,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,
     ########################
     #### (T.fin) #### Output
     ########################
-    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=NULL,p.pass.arr=NULL,scale.transform=scale.transform,un.scale.transform=un.scale.transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
+    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=NULL,p.pass.arr=NULL,scale_transform=scale_transform,un_scale_transform=un_scale_transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
 
 #############################################
 #### 4.2 - Scale Algorithm Exact Version
@@ -464,7 +464,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,
 
 ### theta <- NULL; prev.simn <- NULL; x.init <- NULL; T.start <- 0; theta <- NULL; phi.record <- FALSE; ess.thresh <- 0.5
 
-scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,un.scale.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
+scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
     #################
     #### (0)1 #### Initalise Algorithm
     #################
@@ -477,7 +477,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,u
         if(is.null(x.init)==TRUE){p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{
             if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
             if(dim(x.init)[2]==1){x.init <- matrix(rep(x.init,p.num),dimen,p.num)} # If x.init is a point then repeat
-            p.mat <- apply(x.init,2,scale.transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
+            p.mat <- apply(x.init,2,scale_transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
         } # Setting of p.mat depending on x.init NULL, d dimn vector, dxp dimn vector, 1xd matrix or pxd matrix
         ### Define storage matrices
         p.idx <- 1:p.num; log.p.wei <- rep(log(1/p.num),p.num) # Set idxs and weights
@@ -586,11 +586,11 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,u
     ########################
     #### (T.fin) #### Output
     ########################
-    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale.transform=scale.transform,un.scale.transform=un.scale.transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
+    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale_transform=scale_transform,un_scale_transform=un_scale_transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
 
 ### Modified version of Scale with Theta specification using global assignment
 
-scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,un.scale.transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
+scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew){
     #################
     #### (0)1 #### Initalise Algorithm
     #################
@@ -603,7 +603,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,u
         if(is.null(x.init)==TRUE){p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{
             if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
             if(dim(x.init)[2]==1){x.init <- matrix(rep(x.init,p.num),dimen,p.num)} # If x.init is a point then repeat
-            p.mat <- apply(x.init,2,scale.transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
+            p.mat <- apply(x.init,2,scale_transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
         } # Setting of p.mat depending on x.init NULL, d dimn vector, dxp dimn vector, 1xd matrix or pxd matrix
         ### Define storage matrices
         p.idx <- 1:p.num; log.p.wei <- rep(log(1/p.num),p.num) # Set idxs and weights
@@ -712,7 +712,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale.transform,u
     ########################
     #### (T.fin) #### Output
     ########################
-    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale.transform=scale.transform,un.scale.transform=un.scale.transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
+    list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.dapts=p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale_transform=scale_transform,un_scale_transform=un_scale_transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
 
 
 #############################################
@@ -762,7 +762,7 @@ scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.tim
 #############################################
 scale_extend <- function(prev.simn,t.inc,T.extend){
     ### Extend current simulation
-    new.simn <- scale_exact(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,scale.transform=scale.transform,un.scale.transform=un.scale.transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
+    new.simn <- scale_exact(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,scale_transform=scale_transform,un_scale_transform=un_scale_transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
     ### Append simulation
     append.len          <- length(new.simn$anc.times)-1 # Compute the number of additional mesh points to be added and
     if(append.len>=1){ # append if there are one or more
@@ -777,7 +777,7 @@ scale_extend <- function(prev.simn,t.inc,T.extend){
         anc.times       <- c(prev.simn$anc.times,new.simn$anc.times[append.vec]) # Append new ancestral mesh times
     }else{ # Case where no simulation takes place - output prev.simn information
         p.anc.idx <- prev.simn$p.anc.idx;p.anc.wei <- prev.simn$p.anc.wei; p.anc.mat <- prev.simn$p.anc.mat; p.anc.resamp <- prev.simn$p.anc.resamp; p.anc.ess <- prev.simn$p.anc.ess; p.phi.hist <- prev.simn$p.phi.hist; p.anc.neg <- prev.simn$p.anc.neg; anc.times <- prev.simn$anc.times}
-    list(p.num=new.simn$p.num,p.idx=new.simn$p.idx,log.p.wei=new.simn$log.p.wei,p.mat=new.simn$p.mat,p.layer=new.simn$p.layer,theta=new.simn$theta,p.dapts=new.simn$p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=new.simn$resamp.freq,resamp.method=new.simn$resamp.method,neg.wei.mech=new.simn$neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=anc.times[1],t.inc=new.simn$t.inc,T.fin=new.simn$T.fin,dimen=new.simn$dimen,p.mu=new.simn$p.mu,ss.size=new.simn$ss.size,ess.thresh=new.simn$ess.thresh,ss.phi=new.simn$ss.phi,ss.phiC=new.simn$ss.phiC,p.cyc.arr=new.simn$p.cyc.arr,p.pass.arr=new.simn$p.pass.arr,scale.transform=prev.simn$scale.transform,un.scale.transform=prev.simn$un.scale.transform,progress.check=new.simn$progress.check,phi.record=new.simn$phi.record,p.path.renew=new.simn$p.path.renew)} # Output list
+    list(p.num=new.simn$p.num,p.idx=new.simn$p.idx,log.p.wei=new.simn$log.p.wei,p.mat=new.simn$p.mat,p.layer=new.simn$p.layer,theta=new.simn$theta,p.dapts=new.simn$p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=new.simn$resamp.freq,resamp.method=new.simn$resamp.method,neg.wei.mech=new.simn$neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=anc.times[1],t.inc=new.simn$t.inc,T.fin=new.simn$T.fin,dimen=new.simn$dimen,p.mu=new.simn$p.mu,ss.size=new.simn$ss.size,ess.thresh=new.simn$ess.thresh,ss.phi=new.simn$ss.phi,ss.phiC=new.simn$ss.phiC,p.cyc.arr=new.simn$p.cyc.arr,p.pass.arr=new.simn$p.pass.arr,scale_transform=prev.simn$scale_transform,un_scale_transform=prev.simn$un_scale_transform,progress.check=new.simn$progress.check,phi.record=new.simn$phi.record,p.path.renew=new.simn$p.path.renew)} # Output list
 
 
 
