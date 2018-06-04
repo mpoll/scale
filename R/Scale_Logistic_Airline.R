@@ -7,7 +7,7 @@
 ############################################
 ############################################
 
-airline.logistic.example.2   <- function(){
+airline.logistic.example   <- function(){
     
     ########################################################################
     #### 0.1 - Save current seed and set data seed
