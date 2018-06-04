@@ -3,11 +3,11 @@
 ######       Scale Algorithm         #######
 ######    Logistic Specification     #######
 ######         User Example          #######
-######  Last Updated: 30/05/2018 MP  #######
+######  Last Updated: 04/06/2018 MP  #######
 ############################################
 ############################################
 
-airline.logistic.example   <- function(){
+airline.logistic.example.2   <- function(){
     
     ########################################################################
     #### 0.1 - Save current seed and set data seed
@@ -28,7 +28,7 @@ airline.logistic.example   <- function(){
     ########################################################################
     
     dsz             <<- 120748239                    # Size of data set
-    dimen           <<- 5                            # Dimensionality (>1)
+    dimen           <<- 4                            # Dimensionality (>1)
     
     ########################################################################
     #### 1.2 - Data
