@@ -9,7 +9,7 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-un.scale.transform(eta.pos)
+un_scale_transform(eta.pos)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

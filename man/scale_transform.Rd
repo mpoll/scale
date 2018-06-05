@@ -9,7 +9,7 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-scale.transform(beta.pos)
+scale_transform(beta.pos)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

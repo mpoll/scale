@@ -8,7 +8,7 @@ Exact scale algortihm%%  ~~function to do ... ~~
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-scale_exact(p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, scale.transform, un.scale.transform, T.start = 0, x.init = NULL, ss.size = 1, ess.thresh = 0.5, resamp.method = resid.resamp, neg.wei.mech = scale_zero.wei, prev.simn = NULL, progress.check = FALSE, phi.record = FALSE, resamp.freq = p.num - 1, theta = NULL, p.path.renew = p.path.renew)
+scale_exact(p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, scale_transform, un_scale_transform, T.start = 0, x.init = NULL, ss.size = 1, ess.thresh = 0.5, resamp.method = resid.resamp, neg.wei.mech = scale_zero.wei, prev.simn = NULL, progress.check = FALSE, phi.record = FALSE, resamp.freq = p.num - 1, theta = NULL, p.path.renew = p.path.renew)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
