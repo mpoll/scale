@@ -1,5 +1,5 @@
-\name{un.scale.transform}
-\alias{un.scale.transform}
+\name{un_scale_transform}
+\alias{un_scale_transform}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Untransform

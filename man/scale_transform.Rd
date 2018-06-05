@@ -1,5 +1,5 @@
-\name{scale.transform}
-\alias{scale.transform}
+\name{scale_transform}
+\alias{scale_transform}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Transform
