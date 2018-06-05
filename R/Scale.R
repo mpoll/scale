@@ -11,7 +11,7 @@
 #############################################
 #############################################
 
-mpfrthr <- 9; mpfrpbn <- 10 # mpfr - high  precision kick in levels for alternating series
+mpfrthr <<- 9; mpfrpbn <<- 10 # mpfr - high  precision kick in levels for alternating series
 mat.sort.c <- function(mat,mat.sz,n) {mat[rank(mat[,n],ties.method="first"),] <- mat[1:mat.sz,]; return(mat)} # Define matrix sort (ranking along column)
 mat.sort.r <- function(mat,mat.sz,n) {mat[,rank(mat[n,],ties.method="first")] <- mat[,1:mat.sz]; return(mat)} # Define matrix sort (ranking along a row)
 ins.sort.c <- function(vec,sor.mat,sor.mat.sz,n){ # Insert a vector into a sorted matrix (ranking along a column)
