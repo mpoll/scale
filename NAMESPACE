@@ -8,9 +8,9 @@ import(
     "methods",
     "statmod",
     "abind",
-    "msm",
     "MASS",
     "Rmpfr"
 )
+importFrom("msm","rtnorm")
 importFrom("stats", "aggregate", "binomial", "glm", "rbinom", "rexp", "rnorm", "runif", "vcov")
 useDynLib("scale")

@@ -34,12 +34,11 @@ rare.logistic.example    <- function(){
     #### 1.2 - Generate pseudo-data
     ########################################################################
     
-    library('msm')                            # Package to generate truncated Normals
     design.threshold.1   <<- 0.001             # Thresholding of truncated Normals column 2
     design.threshold.2   <<- 1                # Thresholding of truncated Normals remaining columns
     design.thresh        <<- c(1,design.threshold.1,rep(design.threshold.2,dimen-2))
     
-    examp.design <<- cbind(rep(1,dsz),rtnorm(dsz,mean=0,sd=1,lower=-design.threshold.1,upper=design.threshold.1),matrix(rtnorm((dimen-2)*dsz,mean=0,sd=1,lower=-design.threshold.2,upper=design.threshold.2),dsz,dimen-2))
+    examp.design <<- cbind(rep(1,dsz),msm::rtnorm(dsz,mean=0,sd=1,lower=-design.threshold.1,upper=design.threshold.1),matrix(msm::rtnorm((dimen-2)*dsz,mean=0,sd=1,lower=-design.threshold.2,upper=design.threshold.2),dsz,dimen-2))
     generate.datum <- function(x){datum.z <- exp(sum(beta.truth*x)); rbinom(1,1,datum.z/(1+datum.z))}
     examp.data <<- apply(examp.design,1,generate.datum)
     sum(examp.data); sum(examp.design[,2])

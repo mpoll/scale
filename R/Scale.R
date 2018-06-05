@@ -5,21 +5,11 @@
 ############################################
 ############################################
 
-############################################
-############################################
-### -1- C++ preliminaries
-############################################
-############################################
-
-library(Rcpp); #sourceCpp('../src/scale_rcpp.cpp') # Call CPP code
-
 #############################################
 #############################################
 ### 0 - Libraries, Global Functions & Euler
 #############################################
 #############################################
-
-library(gtools); library(Rmpfr); library(statmod); library(abind); library(MASS)
 
 mpfrthr <- 9; mpfrpbn <- 10 # mpfr - high  precision kick in levels for alternating series
 mat.sort.c <- function(mat,mat.sz,n) {mat[rank(mat[,n],ties.method="first"),] <- mat[1:mat.sz,]; return(mat)} # Define matrix sort (ranking along column)
