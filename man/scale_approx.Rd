@@ -30,11 +30,11 @@ scale_approx(p.num, t.inc, T.fin, ss.phi, ss.phiC, dimen, scale_transform, un_sc
   \item{dimen}{
 %%     ~~Describe \code{dimen} here~~
 }
-  \item{scale.transform}{
-%%     ~~Describe \code{scale.transform} here~~
+  \item{scale_transform}{
+%%     ~~Describe \code{scale_transform} here~~
 }
-  \item{un.scale.transform}{
-%%     ~~Describe \code{un.scale.transform} here~~
+  \item{un_scale_transform}{
+%%     ~~Describe \code{un_scale_transform} here~~
 }
   \item{T.start}{
 %%     ~~Describe \code{T.start} here~~
