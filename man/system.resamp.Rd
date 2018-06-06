@@ -2,7 +2,7 @@
 \alias{system.resamp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Murray...%%  ~~function to do ... ~~
+Systematic Resampling
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
