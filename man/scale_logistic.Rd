@@ -66,6 +66,6 @@ M Pollock
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-scale_logistic()
+\dontrun{scale_logistic()}
 }
 
