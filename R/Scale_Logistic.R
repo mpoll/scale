@@ -166,7 +166,7 @@ data.extrema.2     <- function(design.min,design.max){
 ########################################################################
 ########################################################################
 
-scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.extend=0.01,run.length=100000,ss.size=10,ss.on=TRUE,seed.default=1,data.precompute=TRUE){
+scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.extend=0.01,run.length=25,ss.size=10,ss.on=TRUE,seed.default=1,data.precompute=TRUE){
     # Set seed to default seed
     set.seed(seed.default)
     # Data precomputed by default. If not, compute using the following files
@@ -175,17 +175,17 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.
     if(data.precompute=="airline.logistic.example"){airline.logistic.example()}
     # Save current seed and current data
     curr.seed <- .Random.seed
-    save(file=fnm,dim.grad.max=dim.grad.max,alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent,curr.seed=curr.seed)
+    save(file=fnm,curr.seed=curr.seed)
     # Run initial Scale run
     time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
     # Save current seed and current data
     curr.seed <- .Random.seed
-    save(file=fnm,simn=simn,dim.grad.max=dim.grad.max,alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)
+    save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)
     # Run Scale outputting current seed and current simulation
     while(simn$T.fin < run.length){time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend))[3]
         time.elapse <- time.elapse + time.inc
         curr.seed <- .Random.seed
-        save(file=fnm,simn=simn,dim.grad.max=dim.grad.max,alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
+        save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
 
 #############################################
 #############################################

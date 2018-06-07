@@ -2,12 +2,12 @@
 ########################################################################
 ######                      Scale Algorithm                      #######
 ######                  Logistic Specification                   #######
-######            Rare (Uninformative) Data Example              #######
+######                Uninformative Data Example                 #######
 ######               Last Updated: 04/06/2018 MP                 #######
 ########################################################################
 ########################################################################
 
-rare.logistic.example    <- function(){
+uninformative.logistic.example    <- function(){
     
     ########################################################################
     #### 0.1 - Save current seed and set data seed
