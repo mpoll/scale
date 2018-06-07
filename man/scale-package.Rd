@@ -17,29 +17,57 @@ mathematical formulation of the algorithm and computational efficiency
 has been sacrificed to a considerable degree in order to maintain the
 relationship between the mathematical presentation and the
 implementation itself.
-
-# Examples
+}
+\section{Examples}{
 This section explains how the examples presented in Pollock et
 al. (2016) can be reproduced.
 
-## Preliminaries
-In order to replicate the examples presented in the manucript the
-following preliminary steps are required:
-
- 1. Download the relevant data files from
- (http://www.warwick.ac.uk/mpollock/scale)
+\itemize{
+ \item Download the relevant data files from
+ \url{http://www.warwick.ac.uk/mpollock/scale}
  
- 2. Download the precomputed centering and preconditioning data from
- (http://www.warwick.ac.uk/mpollock/scale)
+ \item Download the precomputed centering and preconditioning data from
+ \url{http://www.warwick.ac.uk/mpollock/scale}
+}
+ \strong{Logistic Regression With Limited Information}
+First, load this library, and download \code{uniformative.Rdata} from 
+ \url{http://www.warwick.ac.uk/mpollock/scale} (this file contains 
+  the data, the precomputed centering value and
+  preconditioning matrix, and some helper functions.): \preformatted{    library("scale")
+    load("uninformative.RData")}
+  Now run the algorithm: \preformatted{ scale_logistic(fnm="uninformative-output.Rdata",p.num=1024,t.inc=0.0001,T.extend=0.0001,run.length=10,ss.size=2,ss.on=TRUE,seed.default=1,data.precompute=TRUE)}    
+and after some time, the file \code{uninformative-output.Rdata} will contain
+the simulation output as an object with name \code{simn}. This can be
+  supplied to \code{scale_ergodic} in order to obtain quantities
+  suitable for computing ergodic averages as described in Pollock et
+  al. (2016).
 
- ## Logistic Regression With Limited Informatioin
+ \strong{Logistic Regression for Airline Data}
+  First, load this library, and download \code{airline.Rdata} from 
+ \url{http://www.warwick.ac.uk/mpollock/scale} (this file contains
+  the airline data, the precomputed centering value and
+  preconditioning matrix and some helper functions.): \preformatted{    library("scale")
+    load("airline.RData")}
+  Now run the algorithm: \preformatted{ scale_logistic(fnm="airline-output.Rdata",p.num=1024,t.inc=0.00001,T.extend=0.00001,run.length=10,ss.size=2,ss.on=TRUE,seed.default=1,data.precompute=TRUE)}    
+and after some time, the file \code{airline-output.Rdata} will contain
+the simulation output as an object with name \code{simn}. This can be
+  supplied to \code{scale_ergodic} in order to obtain quantities
+  suitable for computing ergodic averages as described in Pollock et
+  al. (2016).
 
- ## Logistic Regression for Airline Data
-
- ## Large Logistic Regression
-
- ## Contaminated Regression
- 
+ \strong{Large Logistic Regression}
+ First, load this library, and download \code{large.Rdata} from 
+ \url{http://www.warwick.ac.uk/mpollock/scale} (this file contains
+  the precomputed centering value and preconditioning matrix and some
+  )helper functions (including one to provide individual data
+  values as required by the algorithm.): \preformatted{    library("scale")
+    load("large.RData")}
+  Now run the algorithm: \preformatted{ scale_logistic(fnm="large-output.Rdata",p.num=4096,t.inc=0.00001,T.extend=0.00001,run.length=10,ss.size=64,ss.on=TRUE,seed.default=1,data.precompute=TRUE)}    
+and after some time, the file \code{airline-output.Rdata} will contain
+the simulation output as an object with name \code{simn}. This can be
+  supplied to \code{scale_ergodic} in order to obtain quantities
+  suitable for computing ergodic averages as described in Pollock et
+  al. (2016).
 }
 \author{
 \packageAuthor{scale}
@@ -51,7 +79,7 @@ Maintainer: \packageMaintainer{scale}
 
 }
 \keyword{ package }
-\seealso{
+\seealso{ scale_logistic, scale_ergodic
 }
 \examples{
 }
