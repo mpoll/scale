@@ -79,7 +79,7 @@ Maintainer: \packageMaintainer{scale}
 
 }
 \keyword{ package }
-\seealso{ scale_logistic, scale_ergodic
+\seealso{ scale_logistic
+  scale_ergodic
 }
-\examples{
-}
+

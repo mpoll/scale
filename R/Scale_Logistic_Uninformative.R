@@ -89,4 +89,3 @@ uninformative.logistic.example    <- function(){
     .Random.seed <<- curr.seed
     
 }
-
