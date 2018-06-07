@@ -710,7 +710,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
 #### 5 - Scale Ergodic Extraction
 #############################################
 #############################################
-scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,symm=NULL,even.weights=NULL){
+scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,even.weights=NULL){
     #### 1.1 #### Assign frac.idxs depending on user assignation of retain frac of simulation
     if(is.null(retain.frac)==TRUE){
         frac.idxs <- 1:length(simn$anc.times) # If no specification include all
@@ -739,8 +739,7 @@ scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.tim
         for(i in 1:simn$dimen){ # Assign draws dimension at a time
             simn.draws.dim <- simn.draws[i,,,drop=FALSE] # Extract dimension
             draws[,i] <- simn.draws.dim[r.idxs]} # Assign dimension to draw matrix
-        #### 5 #### If symmetric, symmetrise
-        if(is.null(symm)==FALSE){draws <- rbind(draws,-draws); weights <- c(weights/2,weights/2)}}
+        #### 5 ####
     if(is.null(even.weights)==FALSE){if(even.weights==TRUE){p.idxs <- sample(length(weights),length(weights),replace=TRUE,prob=weights); weights <- rep(1/length(weights),length(weights)); draws <- draws[p.idxs,,drop=FALSE]}}
     #### 6 #### Output ergodic average
     list(idxs=idxs,times=times,weights=weights,draws=draws)}

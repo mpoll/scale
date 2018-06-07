@@ -166,7 +166,7 @@ data.extrema.2     <- function(design.min,design.max){
 ########################################################################
 ########################################################################
 
-scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.extend=0.01,run.length=25,ss.size=10,ss.on=TRUE,seed.default=1,data.precompute=TRUE){
+scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.extend=0.01,run.length=10,ss.size=2,ss.on=TRUE,seed.default=1,data.precompute=TRUE){
     # Set seed to default seed
     set.seed(seed.default)
     # Data precomputed by default. If not, compute using the following files
