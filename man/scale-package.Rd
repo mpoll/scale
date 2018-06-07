@@ -63,7 +63,7 @@ the simulation output as an object with name \code{simn}. This can be
   values as required by the algorithm.): \preformatted{    library("scale")
     load("large.RData")}
   Now run the algorithm: \preformatted{ scale_logistic(fnm="large-output.Rdata",p.num=4096,t.inc=0.00001,T.extend=0.00001,run.length=10,ss.size=64,ss.on=TRUE,seed.default=1,data.precompute=TRUE)}    
-and after some time, the file \code{airline-output.Rdata} will contain
+and after some time, the file \code{large-output.Rdata} will contain
 the simulation output as an object with name \code{simn}. This can be
   supplied to \code{scale_ergodic} in order to obtain quantities
   suitable for computing ergodic averages as described in Pollock et
