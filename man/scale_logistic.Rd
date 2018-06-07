@@ -2,63 +2,62 @@
 \alias{scale_logistic}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Apply the cale algorithm to a logistic regression problem.
-  %%  ~~function to do ... ~~
+Scale for a logistic data set
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Function for running ScaLE on a logisitic data set.
 }
 \usage{
 scale_logistic(fnm = "logistic_default.RData", p.num = 2^10, t.inc = 0.01, T.extend = 0.01, run.length = 1e+05, ss.size = 10, ss.on = TRUE, seed.default = 1, data.precompute = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{fnm}{
-%%     ~~Describe \code{fnm} here~~
-}
-  \item{p.num}{
-%%     ~~Describe \code{p.num} here~~
-}
-  \item{t.inc}{
-%%     ~~Describe \code{t.inc} here~~
-}
-  \item{T.extend}{
-%%     ~~Describe \code{T.extend} here~~
-}
-  \item{run.length}{
-%%     ~~Describe \code{run.length} here~~
-}
-  \item{ss.size}{
-%%     ~~Describe \code{ss.size} here~~
-}
-  \item{ss.on}{
-%%     ~~Describe \code{ss.on} here~~
-}
-  \item{seed.default}{
-%%     ~~Describe \code{seed.default} here~~
-}
-  \item{data.precompute}{
-%%     ~~Describe \code{data.precompute} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
+  \item{fnm}{File name output to be saved to.}
+  \item{p.num}{Specify the number of particles.}
+  \item{t.inc}{Specify the auxiliary mesh increment size.}
+  \item{T.extend}{Specify the frequency (in diffusion time) the code should be saved.}
+  \item{run.length}{Specify the total diffusion time the code has to be executed for. By default set to be 10.}
+  \item{ss.size}{Specify the number of data points required within the sub-sampling construction. By default set to be 2.}
+  \item{ss.on}{Specify whether to use sub-sampling for evaluation of the killing intensity. By default is set to TRUE (i.e. ON), otherwise set to FALSE (i.e. OFF).}
+  \item{seed.default}{For reproducibility enter the seed for the random number generator. By default is set to 1.}
+  \item{data.precompute}{Whether there exists a preloaded data file with example specification. By default is TRUE. Otherwise, specify the example you wish to run ("big.logistic.example", "rare.logistic.example" or  "airline.logistic.example").}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+  \item{curr.seed}{Current state of the RNG.}
+  \item{time.elapse}{Total elapsed system time.}
+  \item{simn}{List containing full ScaLE output (see below for list contents).}
+  \item{simn$anc.times}{Vector of auxiliary mesh times}
+  \item{simn$dimen}{Dimension}
+  \item{simn$ess.thresh}{Percentage effective sample size threshold for conduting resampling.}
+  \item{simn$log.p.wei}{Current log particle weights.}
+  \item{simn$neg.wei.mech}{Mechanism by which to deal with negative particle weights (note: testing only).}
+  \item{simn$p.anc.ess}{Vector of ESS calculation at auxiliary mesh times.}
+  \item{simn$p.anc.neg}{Record of particles which had negative weights (note: testing only).}
+  \item{simn$p.cyc.arr}{Current particle set layers with dimensions ordered by threshold passage times. Also see simn$p.pass.arr.}
+  \item{simn$p.dapts}{Current data points associated with each particle.}
+  \item{simn$p.idx}{Current index of each particle.}
+  \item{simn$p.layer}{Current particle set ordered by next event times.}
+  \item{simn$p.mat}{Current locations of particle set.}
+  \item{simn$p.mu}{Initialisation point(s) of particle set.}
+  \item{simn$p.num}{Number of particles}
+  \item{simn$p.pass.arr}{Current particle set layers with dimensions ordered by dimension. Also see simn$p.cyc.arr.}
+  \item{simn$p.path.renew}{Function used to update the particle set from one time to the next.}
+  \item{simn$scale.transform}{Function used to transform points in original parametrisation space to preconditioned.}
+  \item{simn$ss.phi}{Function used to evaluate true killing intensity (phi).}
+  \item{simn$ss.phiC}{Function used to evaluate for a given hypercube the dominating Poisson killing intensity.}
+  \item{simn$ss.size}{Subsample size.}
+  \item{simn$T.fin}{Maximum diffusion time attained.}
+  \item{simn$t.inc}{Auxiliary mesh increment size.}
+  \item{simn$T.start}{Minimum diffusion time attained.}
+  \item{simn$theta}{Vector of theta, specifying the size of the hypercube.}
+  \item{simn$un.scale.transform}{Function used to transform points in preconditioned space to original parametrisation.}
+
 }
 \references{
-%% ~put references to the literature/web site here ~
+Pollock et al. (2016)
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+M Pollock
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -67,56 +66,6 @@ scale_logistic(fnm = "logistic_default.RData", p.num = 2^10, t.inc = 0.01, T.ext
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (fnm = "logistic_default.RData", p.num = 2^10, t.inc = 0.01, 
-    T.extend = 0.01, run.length = 1e+05, ss.size = 10, ss.on = TRUE, 
-    seed.default = 1, data.precompute = TRUE) 
-{
-    set.seed(seed.default)
-    if (data.precompute == "big.logistic.example") {
-        big.logistic.example()
-    }
-    if (data.precompute == "rare.logistic.example") {
-        rare.logistic.example()
-    }
-    if (data.precompute == "airline.logistic.example") {
-        airline.logistic.example()
-    }
-    curr.seed <- .Random.seed
-    save(file = fnm, dim.grad.max = dim.grad.max, alpha.cent = alpha.cent, 
-        alpha.cent.sq = alpha.cent.sq, alpha.p.cent = alpha.p.cent, 
-        phi.cent = phi.cent, curr.seed = curr.seed)
-    time.elapse <- system.time(simn <<- scale_exact(p.num = p.num, 
-        t.inc = t.inc, T.fin = T.extend, ss.phi = ss.phi, ss.phiC = ss.phiC, 
-        dimen, scale.transform, un.scale.transform, T.start = 0, 
-        x.init = NULL, ss.size = ss.size, ess.thresh = 0.5, resamp.method = resid.resamp, 
-        neg.wei.mech = scale_zero.wei, prev.simn = NULL, progress.check = FALSE, 
-        phi.record = FALSE, resamp.freq = p.num - 1, theta = NULL, 
-        p.path.renew = p.path.renew))[3]
-    curr.seed <- .Random.seed
-    save(file = fnm, simn = simn, dim.grad.max = dim.grad.max, 
-        alpha.cent = alpha.cent, alpha.cent.sq = alpha.cent.sq, 
-        alpha.p.cent = alpha.p.cent, phi.cent = phi.cent, curr.seed = curr.seed, 
-        time.elapse = time.elapse)
-    print(time.elapse)
-    while (simn$T.fin < run.length) {
-        time.inc <- system.time(simn <<- scale_extend(simn, t.inc, 
-            T.extend))[3]
-        time.elapse <- time.elapse + time.inc
-        curr.seed <- .Random.seed
-        save(file = fnm, simn = simn, dim.grad.max = dim.grad.max, 
-            alpha.cent = alpha.cent, alpha.cent.sq = alpha.cent.sq, 
-            alpha.p.cent = alpha.p.cent, phi.cent = phi.cent, 
-            curr.seed = curr.seed, time.elapse = time.elapse)
-        print(time.elapse)
-    }
-  }
+scale_logistic()
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

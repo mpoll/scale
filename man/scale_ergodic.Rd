@@ -16,9 +16,9 @@ scale_ergodic(simn, retain.frac = NULL, retain.frac.range = NULL, trunc.time = N
 \arguments{
   \item{simn}{Output from running scale_exact or scale_extend or scale_logistic}
   \item{retain.frac}{Specify the fraction of the simulation to be retained, otherwise do not specify}
-  \item{retain.frac.range}{Specify a vector of length 2 containing the lower and upper diffusion of the simulation to be extracted, otherwise do not specify}
+  \item{retain.frac.range}{Specify a vector of length 2 containing the lower and upper diffusion time of the simulation to be extracted, otherwise do not specify}
   \item{trunc.time}{Specify the diffusion time from which the simulation is to be retained, otherwise do not specify}
-  \item{trunc.time.range}{Specify a vector of length 2 containing the lower and upper diffusion of the simulation to be extracted, otherwise do not specify}
+  \item{trunc.time.range}{Specify a vector of length 2 containing the lower and upper diffusion time of the simulation to be extracted, otherwise do not specify}
   \item{even.weights}{TRUE returns a (re-sampled) particle set with equal weights. FALSE returns weighted particle set. FALSE by default}
 }
 \details{
