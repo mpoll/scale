@@ -9,7 +9,7 @@ A variably informative logistic regression example
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Function which when called executes the initialisation of the "Limited Information Logistic Regression" example
 
-NB: We do not recommend executing this function, but instead loading rare.RData which is the saved output of this function.
+NB: We do not recommend executing this function, but instead loading uninformative.RData which is the saved output of this function.
 }
 \usage{
 uninformative.logistic.example()

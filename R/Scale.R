@@ -738,7 +738,7 @@ scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.tim
         draws <- matrix(0,simn$p.num*length(idxs),simn$dimen,dimnames=list(NULL,sprintf("dim.%i",1:simn$dimen))) # Define draws matrix
         for(i in 1:simn$dimen){ # Assign draws dimension at a time
             simn.draws.dim <- simn.draws[i,,,drop=FALSE] # Extract dimension
-            draws[,i] <- simn.draws.dim[r.idxs]} # Assign dimension to draw matrix
+            draws[,i] <- simn.draws.dim[r.idxs]}} # Assign dimension to draw matrix
         #### 5 ####
     if(is.null(even.weights)==FALSE){if(even.weights==TRUE){p.idxs <- sample(length(weights),length(weights),replace=TRUE,prob=weights); weights <- rep(1/length(weights),length(weights)); draws <- draws[p.idxs,,drop=FALSE]}}
     #### 6 #### Output ergodic average
