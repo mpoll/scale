@@ -768,5 +768,43 @@ scale_extend <- function(prev.simn,t.inc,T.extend){
         p.anc.idx <- prev.simn$p.anc.idx;p.anc.wei <- prev.simn$p.anc.wei; p.anc.mat <- prev.simn$p.anc.mat; p.anc.resamp <- prev.simn$p.anc.resamp; p.anc.ess <- prev.simn$p.anc.ess; p.phi.hist <- prev.simn$p.phi.hist; p.anc.neg <- prev.simn$p.anc.neg; anc.times <- prev.simn$anc.times}
     list(p.num=new.simn$p.num,p.idx=new.simn$p.idx,log.p.wei=new.simn$log.p.wei,p.mat=new.simn$p.mat,p.layer=new.simn$p.layer,theta=new.simn$theta,p.dapts=new.simn$p.dapts,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=new.simn$resamp.freq,resamp.method=new.simn$resamp.method,neg.wei.mech=new.simn$neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=anc.times[1],t.inc=new.simn$t.inc,T.fin=new.simn$T.fin,dimen=new.simn$dimen,p.mu=new.simn$p.mu,ss.size=new.simn$ss.size,ess.thresh=new.simn$ess.thresh,ss.phi=new.simn$ss.phi,ss.phiC=new.simn$ss.phiC,p.cyc.arr=new.simn$p.cyc.arr,p.pass.arr=new.simn$p.pass.arr,scale_transform=prev.simn$scale_transform,un_scale_transform=prev.simn$un_scale_transform,progress.check=new.simn$progress.check,phi.record=new.simn$phi.record,p.path.renew=new.simn$p.path.renew)} # Output list
 
+#############################################
+#############################################
+#### 7 - PF ESS Calculation
+#############################################
+#############################################
+
+scale_ess <- function(ergodic_output) {
+    
+    ergodic_splits <- rbind((c(1:length(ergodic_output$times))-1)*(length(ergodic_output$weights)/length(ergodic_output$times))+1,(c(1:length(ergodic_output$times)))*(length(ergodic_output$weights)/length(ergodic_output$times)))
+    p.means <- p.sds <- matrix(0,dim(ergodic_output$draws)[2],length(ergodic_output$times))
+    for(i in 1:length(ergodic_output$times)){
+        for(j in 1:dim(ergodic_output$draws)[2]){
+            p.means[j,i] <- mean(ergodic_output$draws[ergodic_splits[1,i]:ergodic_splits[2,i],j])
+            p.sds[j,i] <- sd(ergodic_output$draws[ergodic_splits[1,i]:ergodic_splits[2,i],j])
+        }
+    }
+    ESS <- c()
+    for(j in 1:dim(ergodic_output$draws)[2]){
+        n=length(p.means[j,])
+        mns=p.means[j,]
+        vars=p.sds[j,]^2
+        
+        pos.mn=mean(mns)
+        pos.var=mean(vars+(mns-pos.mn)^2)
+        
+        var.marg=(mns-pos.mn)^2
+        
+        Mar.ESS=pos.var/mean(var.marg)
+        
+        a=acf(mns)
+        #ACT=(2*sum(a[[1]])-1)
+        ACT=(1+a[[1]][2])/(1-a[[1]][2])
+        
+        ESS[j]=Mar.ESS/ACT
+    }
+    list(ess=ESS)
+}
+
 
 

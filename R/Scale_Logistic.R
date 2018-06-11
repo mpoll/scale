@@ -187,6 +187,14 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.
         curr.seed <- .Random.seed
         save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
 
+scale_logisitic_relaunch <- function(fnm="logistic_default.RData",run.extend = 10){
+    .Random.seed <- curr.seed # Reset seed
+    T.start <- simn$T.fin
+    while(simn$T.fin < T.start + run.extend){time.inc <- system.time(simn <<- scale_extend(simn,simn$t.inc,simn$t.inc))[3]
+        time.elapse <- time.elapse + time.inc
+        curr.seed <- .Random.seed
+        save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
+
 #############################################
 #############################################
 #### 5 - Functions to combine multiply split data for inititialisation
