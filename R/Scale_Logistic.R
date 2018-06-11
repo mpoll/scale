@@ -2,7 +2,7 @@
 ########################################################################
 ######                      Scale Algorithm                      #######
 ######        Algorithm Specification for Logistic Data          #######
-######              Last Updated: 04/06/2018 MP                  #######
+######              Last Updated: 11/06/2018 MP                  #######
 ########################################################################
 ########################################################################
 
@@ -177,7 +177,7 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.
     curr.seed <- .Random.seed
     save(file=fnm,curr.seed=curr.seed)
     # Run initial Scale run
-    time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
+    time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,x.init.random=TRUE,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
     # Save current seed and current data
     curr.seed <- .Random.seed
     save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)
@@ -187,7 +187,7 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.
         curr.seed <- .Random.seed
         save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
 
-scale_logisitic_relaunch <- function(fnm="logistic_default.RData",run.extend = 10){
+scale_logistic_relaunch <- function(fnm="logistic_default.RData",run.extend = 10){
     .Random.seed <- curr.seed # Reset seed
     T.start <- simn$T.fin
     while(simn$T.fin < T.start + run.extend){time.inc <- system.time(simn <<- scale_extend(simn,simn$t.inc,simn$t.inc))[3]
