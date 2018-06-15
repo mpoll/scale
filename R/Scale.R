@@ -616,6 +616,34 @@ scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.tim
     #### 6 #### Output ergodic average
     list(idxs=idxs,times=times,weights=weights,draws=draws)}
 
+scale_ergodic_2 <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,even.weights=TRUE,transform=TRUE,retain.every=1){
+    #### 1.1 #### Assign frac.idxs depending on user assignation of retain frac of simulation
+    if(is.null(retain.frac)==TRUE){
+        frac.idxs <- 1:length(simn$anc.times) # If no specification include all
+    }else{
+        frac.idxs <- floor(length(simn$anc.times)*(1-retain.frac)):length(simn$anc.times)} # If specified include specified number
+    if(is.null(retain.frac.range)==FALSE){
+        frac.idxs <- floor(length(simn$anc.times)*retain.frac.range[1]):ceiling(length(simn$anc.times)*retain.frac.range[2])} # If a range of idxs to be included has been specified then choose specified range
+    #### 1.2 #### Assign time.idxs depending on user assignation of trunc.time of simulation
+    if(is.null(trunc.time)==TRUE){
+        time.idxs <- 1:length(simn$anc.times) # If no specification include all
+    }else{
+        if(simn$T.fin < trunc.time){time.idxs <- numeric(0)}else{time.idxs <- length(simn$anc.times[simn$anc.times <= trunc.time]):length(simn$anc.times)}} # If specified include specified number
+    if(is.null(trunc.time.range)==FALSE){
+        time.idxs <- length(simn$anc.times[simn$anc.times <= trunc.time.range[1]]):length(simn$anc.times[simn$anc.times <= trunc.time.range[2]])} # If a range of idxs to be included has been specified then choose specified range
+    #### 2 #### Find intersection of ranges and define storage matrices
+    idxs <- intersect(frac.idxs,time.idxs); p.num <- simn$p.num; l.idxs <- length(idxs); c.idxs <- 1:(p.num*l.idxs); r.idxs <- numeric(0); for(i in 1:l.idxs){r.idxs <- c(r.idxs,(0:(p.num-1))*l.idxs+i)} # Define various index extractions
+    idxs <- intersect(idxs,c(1:length(simn$anc.times))*retain.every)
+    times <- simn$anc.times[idxs] # Define times
+    simn.draws <- simn$p.anc.mat[,,idxs,drop=FALSE]
+    simn.weights <- simn$p.anc.wei[idxs,,drop=FALSE]
+    if(transform==TRUE){for(j in 1:length(idxs)){simn.draws[,,j] <- apply(simn.draws[,,j],2,un_scale_transform)}}
+    if(even.weights==TRUE){
+        for(j in 1:length(idxs)){
+            simn.draws[,,j] <- simn.draws[,sample(simn$p.num,simn$p.num,replace=TRUE,prob=simn.weights[j,]),j]
+            simn.weights[j,] <- 1/simn$p.num}}
+    list(idxs=idxs,times=times,weights=simn.weights,draws=simn.draws)}
+
 #############################################
 #############################################
 #### 6 - Extend existing scale algorithm

@@ -170,8 +170,8 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.
     # Set seed to default seed
     set.seed(seed.default)
     # Data precomputed by default. If not, compute using the following files
-    if(data.precompute=="big.logistic.example"){big.logistic.example()}
-    if(data.precompute=="rare.logistic.example"){rare.logistic.example()}
+    if(data.precompute=="large.logistic.example"){large.logistic.example()}
+    if(data.precompute=="uninformative.logistic.example"){uninformative.logistic.example()}
     if(data.precompute=="airline.logistic.example"){airline.logistic.example()}
     # Save current seed and current data
     curr.seed <- .Random.seed
