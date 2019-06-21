@@ -16,6 +16,7 @@ airline.logistic.example   <- function(){
     curr.seed <- .Random.seed
     set.seed(1)
     load("airline_raw.RData")
+    load("airline.RData")
     
     ########################################################################
     ########################################################################
@@ -34,9 +35,13 @@ airline.logistic.example   <- function(){
     #### 1.2 - Data
     ########################################################################
     
-    airline <- airline[sample.int(dsz, dsz, replace = FALSE),]
-    examp.design <- matrix(0,dsz,dimen); examp.design[,1] <- 1; for(j in 2:dimen){examp.design[,j] <- as.numeric(airline[,j])}; examp.design <<- examp.design
-    examp.data <<- airline[,1]
+    ### If airline.RData is not loaded then the following steps are required
+    
+    ### Note the "Airline" data set ("airline_raw.RDatahas been pre-processed so that examp.design (the design matrix for the example) and examp.data (the data for the example) are in the required form for execution.
+    
+    #airline <- airline[sample.int(dsz, dsz, replace = FALSE),]
+    #examp.design <- matrix(0,dsz,dimen); examp.design[,1] <- 1; for(j in 2:dimen){examp.design[,j] <- as.numeric(airline[,j])}; examp.design <<- examp.design
+    #examp.data <<- airline[,1]
     
     ########################################################################
     #### 1.2 - Centering Computation

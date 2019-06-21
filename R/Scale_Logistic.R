@@ -166,7 +166,7 @@ data.extrema.2     <- function(design.min,design.max){
 ########################################################################
 ########################################################################
 
-scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.extend=0.01,run.length=10,ss.size=2,ss.on=TRUE,x.init.random=TRUE,seed.default=1,data.precompute=TRUE){
+scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.extend=0.01,run.length=10,ss.size=2,ss.on=TRUE,x.init=NULL,x.init.random=TRUE,seed.default=1,data.precompute=TRUE){
     # Set seed to default seed
     set.seed(seed.default)
     # Data precomputed by default. If not, compute using the following files
@@ -177,7 +177,7 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^10,t.inc=0.01,T.
     curr.seed <- .Random.seed
     save(file=fnm,curr.seed=curr.seed)
     # Run initial Scale run
-    time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,x.init.random=x.init.random,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
+    time.elapse <- system.time(simn <<- scale_exact(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=x.init,x.init.random=x.init.random,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=p.num-1,theta=NULL,p.path.renew=p.path.renew))[3]
     # Save current seed and current data
     curr.seed <- .Random.seed
     save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)
