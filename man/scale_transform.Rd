@@ -1,59 +1,34 @@
 \name{scale_transform}
 \alias{scale_transform}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-  Transform
-  %%  ~~function to do ... ~~
+  Simple Preconditioning Transformation
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Applies the `simple' preconditioning transformation described within the `Implementation Details' section of Pollock et al. (2016) to points in the original space (\code{beta.pos}), centred at the point at which the control variate is computed (\code{beta.star}). Outputs a vector giving the position within the transformed space (\code{eta.pos}).
 }
 \usage{
 scale_transform(beta.pos)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{beta.pos}{
-%%     ~~Describe \code{beta.pos} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
+  \item{beta.pos}{Point within the original space to be transformed}
+  \item{beta.star}{Point within the original space that the control variate is computed at}
+  \item{n.sigma.inv}{Simple inverse preconditioning matrix}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+\item{eta.pos }{Point within the transformed space}
 }
 \references{
-%% ~put references to the literature/web site here ~
+  Pollock, Murray, Paul Fearnhead, Adam M. Johansen, and Gareth O. Roberts. "The scalable Langevin exact algorithm: Bayesian inference for big data." arXiv preprint arXiv:1609.03436 (2016).
 }
 \author{
-%%  ~~who you are~~
+\packageAuthor{scale}
 }
 \note{
-%%  ~~further notes~~
+As discussed within Pollock et al. (2016) the simple preconditioning procedure uses a diagonal matrix. Modification to this function would be required (along with associated package functions) if the full preconditioning matrix were to be used (\code{precon} / \code{precon.inv}).
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+un_scale_transform
 }
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (beta.pos) 
-{
-    matrix(c(diag(n.sigma.inv) * (beta.pos - beta.star)), nrow = 1)
-  }
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ Transformation }

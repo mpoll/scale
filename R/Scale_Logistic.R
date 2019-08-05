@@ -28,6 +28,7 @@ un_scale_transform    <- function(eta.pos){matrix(c(diag(n.sigma)*eta.pos+beta.s
 datum.eval   <- function(beta.pos,data.idx){
     #### CALL DATA
     datum.call      <- datum(data.idx)
+    data.counter    <<- data.counter + 1 # Index data access counter
     #### EVALUATE
     datum.z         <- exp(sum(datum.call$x*beta.pos))
     log.pi          <- datum.call$x*beta.pos*datum.call$y-log(1+datum.z)
@@ -110,7 +111,7 @@ data.init.2       <- function(beta.eval=beta.star,datum.idx.start=1,length.idxs=
     alpha.cent.sq <<- (alpha.cent)%*%t(alpha.cent)
     alpha.p.cent <<- sum(lap.log.pi)
     phi.cent <<- (alpha.cent.sq+alpha.p.cent)/2
-    list(alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent)}
+    list(alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,lap.log.pi=lap.log.pi,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent)}
 
 ########################################################################
 #### 3.2 - Computation of Subsampling bounding functionals

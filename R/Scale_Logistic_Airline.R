@@ -30,7 +30,7 @@ airline.logistic.example   <- function(){
     
     dsz             <<- 120748239                    # Size of data set
     dimen           <<- 4                            # Dimensionality (>1)
-    
+
     ########################################################################
     #### 1.2 - Data
     ########################################################################
@@ -76,8 +76,8 @@ airline.logistic.example   <- function(){
     #############################################
     
     datum     <<- function(datum.idx){
-        datum.x     <- as.numeric(examp.design[datum.idx,])
-        datum.y     <- as.numeric(examp.data[datum.idx])
+        datum.x         <- as.numeric(examp.design[datum.idx,])
+        datum.y         <- as.numeric(examp.data[datum.idx])
         list(idx=datum.idx,x=datum.x,y=datum.y)}
     
     ########################################################################

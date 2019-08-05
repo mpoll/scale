@@ -23,7 +23,7 @@ double _eadel(unsigned long n, double s, double t, double x, double y,  double m
   if(t==s)
     return 1;
 
-  if(m > max(x,y)){
+  if(m > min(x,y)){
      x = -x;
      y = -y;
      u = -u;

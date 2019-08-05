@@ -1,7 +1,7 @@
 ############################################
 ############################################
 ######       Scale Algorithm         #######
-######  Last Updated: 11/06/2018 MP  #######
+######  Last Updated: 11/08/2018 MP  #######
 ############################################
 ############################################
 
@@ -112,9 +112,9 @@ eagamma		<- function(n,s,t,x,y,L,U){1-eazeta(n,s,t,x,y,L,U)} # Gamma Functional
 eapsi		<- function(j,s,t,m,xoy,u){P<--2*abs(u-m)*j/(t-s);(2*abs(u-m)*j-(xoy-m))*exp(P*(abs(u-m)*j-(xoy-m)))} # Psi Functional
 eachi		<- function(j,s,t,m,xoy,u){P<--2*abs(u-m)*j/(t-s);(2*abs(u-m)*j+(xoy-m))*exp(P*(abs(u-m)*j+(xoy-m)))} # Chi Functional
 eadel2  	<- function(n,s,t,m,xoy,u){if(max(xoy-u,m-xoy)>=0){0}else{if(even(n)){j<-1:(n/2);1-(sum(eapsi(j,s,t,m,xoy,u)-eachi(j,s,t,m,xoy,u)))/(xoy-m)}else{if(n>1){j<-1:((n-1)/2);1-(sum(eapsi(j,s,t,m,xoy,u)-eachi(j,s,t,m,xoy,u)))/(xoy-m)-eapsi(max(j)+1,s,t,m,xoy,u)/(xoy-m)}else{1-eapsi(1,s,t,m,xoy,u)/(xoy-m)}}}}
-eadel		<- function(n,s,t,x,y,m,u){if(x==m){xI<-1}else{xI<-0};if(y==m){yI<-1}else{yI<-0};if(max(xI,yI)==1){delT<-2}else{delT<-1};if(m>max(x,y)){x<--x;y<--y;m<--m;u<--u};if(max(x-u,y-u,m-x,m-y)>=0){out<-0};if(delT==1){out<-eagamma_cpp(n,s,t,x,y,m,u)/(1-exp(-2*(x-m)*(y-m)/(t-s)))};if(delT==2){if(xI*yI==0){xoy<-max(x,y);out<-eadel2_cpp(n,s,t,m,xoy,u)}else{out<-0}};if(out<0){out<-0};if(out>1){out<-1};if((t-s)==0){out <- 1}; out}
-eadelR		<- function(n,s,t,x,y,m,u){if(x==m){xI<-1}else{xI<-0};if(y==m){yI<-1}else{yI<-0};if(max(xI,yI)==1){delT<-2}else{delT<-1};if(m>max(x,y)){x<--x;y<--y;m<--m;u<--u};if(max(x-u,y-u,m-x,m-y)>=0){out<-0};if(delT==1){out<-eagamma(n,s,t,x,y,m,u)/(1-exp(-2*(x-m)*(y-m)/(t-s)))};if(delT==2){if(xI*yI==0){xoy<-max(x,y);out<-eadel2(n,s,t,m,xoy,u)}else{out<-0}};if(out<0){out<-0};if(out>1){out<-1};if((t-s)==0){out <- 1}; out}
-eadelC 		<- function(mt,s,t,x,y,m,u){if(mt>=mpfrthr){pbn<-mt*mpfrpbn;s<-mpfr(s,precBits=pbn);t<-mpfr(t,precBits=pbn);x<-mpfr(x,precBits=pbn);y<-mpfr(y,precBits=pbn);m<-mpfr(m,precBits=pbn);u<-mpfr(u,precBits=pbn);c(s1=eadelR(mt,s,t,x,y,m,u),s2=eadelR(mt+1,s,t,x,y,m,u))}else{eadel_pair_cpp(mt,s,t,x,y,m,u);}}
+eadel		<- function(n,s,t,x,y,m,u){if(x==m){xI<-1}else{xI<-0};if(y==m){yI<-1}else{yI<-0};if(max(xI,yI)==1){delT<-2}else{delT<-1};if(m>min(x,y)){x<--x;y<--y;m<--m;u<--u};if(max(x-u,y-u,m-x,m-y)>=0){out<-0};if(delT==1){out<-eagamma_cpp(n,s,t,x,y,m,u)/(1-exp(-2*(x-m)*(y-m)/(t-s)))};if(delT==2){if(xI*yI==0){xoy<-max(x,y);out<-eadel2_cpp(n,s,t,m,xoy,u)}else{out<-0}};if(out<0){out<-0};if(out>1){out<-1};if((t-s)==0){out <- 1}; out}
+eadelR		<- function(n,s,t,x,y,m,u){if(x==m){xI<-1}else{xI<-0};if(y==m){yI<-1}else{yI<-0};if(max(xI,yI)==1){delT<-2}else{delT<-1};if(m>min(x,y)){x<--x;y<--y;m<--m;u<--u};if(max(x-u,y-u,m-x,m-y)>=0){out<-0};if(delT==1){out<-eagamma(n,s,t,x,y,m,u)/(1-exp(-2*(x-m)*(y-m)/(t-s)))};if(delT==2){if(xI*yI==0){xoy<-max(x,y);out<-eadel2(n,s,t,m,xoy,u)}else{out<-0}};if(out<0){out<-0};if(out>1){out<-1};if((t-s)==0){out <- 1}; out}
+eadelC 		<- function(mt,s,t,x,y,m,u){if(mt>=mpfrthr){pbn<-mt*mpfrpbn;s<-mpfr(s,precBits=pbn);t<-mpfr(t,precBits=pbn);x<-mpfr(x,precBits=pbn);y<-mpfr(y,precBits=pbn);m<-mpfr(m,precBits=pbn);u<-mpfr(u,precBits=pbn);c(s1=eadelR(mt,s,t,x,y,m,u),s2=eadelR(mt+1,s,t,x,y,m,u))}else{eadel_pair_cpp(mt,s,t,x,y,m,u)}}
 
 #############################################
 #### 2.1.2 - Simulate Bessel 3 Process Mid Points - See Pollock (PhD Thesis, 2013)
@@ -166,12 +166,20 @@ dev.pr		<- function(Jst.t=0.64,Jst.rat=0.5776972){ # First Hitting Time (J*) Pro
     repeat{E <- rexp(2,1); if(E[1]^2 <= 2*E[2]/Jst.t){X <- Jst.t/(1+Jst.t*E[1])^2; break}}}
     list(X=X,U=U,E=E)}
 
-dev.rej		<- function(X){ # First Hitting Time (J*) Rejection Sampler
-	S <- pi*exp(-pi^2*X/8)/2; n <- 0; Y <- runif(1,0,1)*S # Initialise sequence and simulate Uniform
-    repeat{ # Loop
-        n <- n + 1; S <- S - (-1)^n*pi*(n+1/2)*exp(-(n+1/2)^2*pi^2*X/2); if(Y < S){Acc <- 1; break} # Odd n
-        n <- n + 1; S <- S + (-1)^n*pi*(n+1/2)*exp(-(n+1/2)^2*pi^2*X/2); if(Y > S){Acc <- 0; break}} # Even n
-     list(Acc=Acc,S=S,n=n,Y=Y,X=X)}
+dev.rej         <- function(X,Jst.t=0.64){ # First Hitting Time (J*) Rejection Sampler given a proposed point (X)
+    if(X <= Jst.t){ # Series sampler 1, used around critical point 0.64 (t*<= 0.64, see Appendix C)
+        S <- exp(-1/(2*X))/2; n <- -1; Y <- runif(1,0,1)*S # Initialise alternating sequence and simulate appropriate Uniform
+        repeat{
+            n <- n+2 # Indexation of sequence for subsequent odd / even terms
+            S <- S - (n+0.5)*exp(-2*(n+0.5)^2/X); if(Y <= S){Acc <- 1; n <- n-1; break} # Odd n
+            S <- S + (n+1.5)*exp(-2*(n+1.5)^2/X); if(Y >= S){Acc <- 0; break}} # Even n
+    }else{ # Series sampler 2, used around critical point 0.64 (t*> 0.64, see Appendix C)
+        S <- exp(-pi^2*X/8)/2; n <- -1; Y <- runif(1,0,1)*S # Initialise alternating sequence and simulate appropriate Uniform
+        repeat{
+            n <- n+2 # Indexation of sequence for subsequent odd / even terms
+            S <- S - (n+0.5)*exp(-(n+0.5)^2*pi^2*X/2); if(Y <= S){Acc <- 1; n <- n-1; break} # Odd n
+            S <- S + (n+1.5)*exp(-(n+1.5)^2*pi^2*X/2); if(Y >= S){Acc <- 0; break}}} # Even n
+    list(Acc=Acc,S=S,n=n,Y=Y,X=X)} # Output A/R. Note S will not match target density as constants have been removed (see Appendix C)
 
 #############################################
 ##### 2.2.3 - First Hitting Time (J*) Simulation
@@ -253,12 +261,19 @@ ss.phiC         <- function(p.mat.curr,l.bound=NULL,u.bound=NULL){ # Function of
     phiL <- phi.cent - phi.bds; phiU <- phi.cent + phi.bds; intensity <- phiU - phiL # Compute Bounding functionals and intensity
     list(distance=distance,alpha.bds=alpha.bds,alpha.prime.bds=alpha.prime.bds,A.bds=A.bds,phiL=phiL,phiU=phiU,intensity=intensity)}
 
-
 #############################################
-#### 3.3 - TURN OFF THE SUB SAMPLER (REQUIRES SETTING ss.on <- FALSE)
+#### 3.3 - Functionals only loaded if not otherwise defined
 #############################################
 
-if(exists("ss.on")==TRUE){if(ss.on==FALSE){ss.phi <- function(eta.pos,dapts,ss.size){ac.phi(eta.pos,dapts)}}}
+.onLoad <- function(libname,pkgname){
+    ### DATA ACCESS Counter
+    
+    if(exists("data.counter")==FALSE){data.counter <<- 0} # Set the data access counter to zero if it doesn't already exist
+    
+    ### TURN OFF THE SUB SAMPLER (REQUIRES SETTING ss.on <- FALSE)
+    
+    if(exists("ss.on")==TRUE){if(ss.on==FALSE){ss.phi <- function(eta.pos,dapts,ss.size){ac.phi(eta.pos,dapts)}}}
+}
 
 #############################################
 #### 3.4 - Approximate Algorithm Apply Functionals
