@@ -2,7 +2,7 @@
 ########################################################################
 ######                      Scale Algorithm                      #######
 ######        Algorithm Specification for Logistic Data          #######
-######              Last Updated: 11/06/2018 MP                  #######
+######              Last Updated: 25/08/2019 MP                  #######
 ########################################################################
 ########################################################################
 
@@ -28,32 +28,14 @@ un_scale_transform    <- function(eta.pos){matrix(c(diag(n.sigma)*eta.pos+beta.s
 datum.eval   <- function(beta.pos,data.idx){
     #### CALL DATA
     datum.call      <- datum(data.idx)
-    data.counter    <<- data.counter + 1 # Index data access counter
     #### EVALUATE
     datum.z         <- exp(sum(datum.call$x*beta.pos))
-    log.pi          <- datum.call$x*beta.pos*datum.call$y-log(1+datum.z)
     grad.log.pi     <- diag(n.sigma)*datum.call$x*(datum.call$y-datum.z/(1+datum.z))
     lap.log.pi      <- -(diag(n.sigma)*datum.call$x)^2*datum.z/(1+datum.z)^2
-    list(log.pi=log.pi,grad.log.pi=grad.log.pi,lap.log.pi=lap.log.pi)}
+    list(grad.log.pi=grad.log.pi,lap.log.pi=lap.log.pi)}
 
 ########################################################################
-#### 2.2 - Recall multiple data points to output specified subset of the design matrix and data
-########################################################################
-
-data.subset <- function(datum.idx.start=1,length.idxs=dsz){
-    if(exists("examp.design")==FALSE){
-        call.data <- datum(datum.idx.start)
-        subset.design <- t(as.matrix(call.data$x)); subset.data <- call.data$y
-        if(length.idxs>1){for(i in (datum.idx.start+1):(datum.idx.start+length.idxs-1)){
-            call.data <- datum(i)
-            subset.design <- rbind(subset.design,call.data$x); subset.data <- c(subset.data,call.data$y)    }}}
-    if(exists("examp.design")==TRUE){
-        subset.design  <- examp.design[datum.idx.start:(datum.idx.start+length.idxs-1),]
-        subset.data <- examp.data[datum.idx.start:(datum.idx.start+length.idxs-1)]}
-    list(subset.design=subset.design,subset.data=subset.data)}
-
-########################################################################
-#### 2.3 - Recall and evaluate multiple data points
+#### 2.2 - Recall and evaluate multiple data points
 ########################################################################
 
 data.eval       <- function(beta.pos,data.idxs,factor=1){ # Factor is a multiple of output grad log and lap log
@@ -63,6 +45,22 @@ data.eval       <- function(beta.pos,data.idxs,factor=1){ # Factor is a multiple
         grad.log.pi         <- grad.log.pi + datum.call$grad.log.pi
         lap.log.pi          <- lap.log.pi + datum.call$lap.log.pi}
     list(grad.log.pi=factor*grad.log.pi,lap.log.pi=factor*lap.log.pi)}
+
+########################################################################
+#### 2.3 - Recall multiple data points to output specified subset of the design matrix and data
+########################################################################
+
+data.subset <- function(datum.idx.start=1,length.idxs=dsz){
+    if(exists("examp.design")==FALSE){
+        call.data <- datum(datum.idx.start)
+        subset.design <- t(as.matrix(call.data$x)); subset.data <- call.data$y
+        if(length.idxs>1){for(i in (datum.idx.start+1):(datum.idx.start+length.idxs-1)){
+            call.data <- datum(i)
+            subset.design <- rbind(subset.design,call.data$x); subset.data <- c(subset.data,call.data$y)}}}
+    if(exists("examp.design")==TRUE){
+        subset.design  <- examp.design[datum.idx.start:(datum.idx.start+length.idxs-1),]
+        subset.data <- examp.data[datum.idx.start:(datum.idx.start+length.idxs-1)]}
+    list(subset.design=subset.design,subset.data=subset.data)}
 
 ########################################################################
 ########################################################################
@@ -81,7 +79,7 @@ logistic.centering      <- function(datum.idx.start=1,length.idxs=dsz){
         subset.glm <- glm(formula = subset.data ~ subset.design.mat, family = binomial(link='logit'))
         center <- subset.glm$coef
         precon <- vcov(subset.glm)
-        list(center=center,precon=precon,precon.inv=solve(precon),logistic.glm=subset.glm,det.metric=det(precon))
+    list(center=center,precon=precon,precon.inv=solve(precon),logistic.glm=subset.glm,det.metric=det(precon))
 }
 
 ########################################################################
@@ -91,10 +89,12 @@ logistic.centering      <- function(datum.idx.start=1,length.idxs=dsz){
 data.init       <- function(beta.eval=beta.star,datum.idx.start=1,length.idxs=dsz){
     evaluate <- data.eval(beta.eval,c(datum.idx.start:(datum.idx.start+length.idxs-1)))
     alpha.cent <<- matrix(as.numeric(evaluate$grad.log.pi),nrow=1)
+    alpha.cent.bds <<- sum((2*alpha.cent)^2)^(1/2)
     alpha.cent.sq <<- (alpha.cent)%*%t(alpha.cent)
     alpha.p.cent <<- sum(as.numeric(evaluate$lap.log.pi))
     phi.cent <<- (alpha.cent.sq+alpha.p.cent)/2
-    list(alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent)}
+    Hessian.bound <<- sum((diag(n.sigma)^2)/4)
+    list(alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.cent.bds=alpha.cent.bds,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent,Hessian.bound=Hessian.bound)}
 
 # More efficient initialisation in case data is fully available in form of examp.design and examp.data and is partitioned due to size
 
@@ -108,58 +108,21 @@ data.init.2       <- function(beta.eval=beta.star,datum.idx.start=1,length.idxs=
     grad.log.pi <- as.numeric(apply(subset.grad.log.pi,1,sum))
     lap.log.pi <- as.numeric(apply(subset.lap.log.pi,1,sum))
     alpha.cent <<- matrix(grad.log.pi,nrow=1)
+    alpha.cent.bds <<- sum((2*alpha.cent)^2)^(1/2)
     alpha.cent.sq <<- (alpha.cent)%*%t(alpha.cent)
     alpha.p.cent <<- sum(lap.log.pi)
     phi.cent <<- (alpha.cent.sq+alpha.p.cent)/2
-    list(alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,lap.log.pi=lap.log.pi,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent)}
+    Hessian.bound <<- sum((diag(n.sigma)^2)/4)
+    list(alpha.cent=alpha.cent,alpha.cent.sq=alpha.cent.sq,alpha.cent.bds=alpha.cent.bds,lap.log.pi=lap.log.pi,alpha.p.cent=alpha.p.cent,phi.cent=phi.cent,Hessian.bound=Hessian.bound)}
 
 ########################################################################
-#### 3.2 - Computation of Subsampling bounding functionals
+#### 3.2 - Function for computing the intensity upper / lower bounds for logistic regression
 ########################################################################
 
-data.extrema    <- function(datum.idx.start=1,length.idxs=dsz){
-    ##### 3.2.1 - Precompute the most extreme data values
-    if(exists("design.thresh")==TRUE){if(length(design.thresh)==1){design.min <- c(1,rep(-design.thresh,dimen-1)); design.max <- c(1,rep(design.thresh,dimen-1))}else{design.min <- c(1,-design.thresh[2:dimen]); design.max <- design.thresh}}
-    if(exists("design.thresh")==FALSE){subset.design <- data.subset(datum.idx.start,length.idxs)$subset.design; design.min <- apply(subset.design,2,min); design.max <- apply(subset.design,2,max)}
-    extrema.design <- permutations(n=2,r=dimen,v=c(0,1),repeats.allowed=TRUE); for(i in 1:dimen){extrema.design[,i] <- (1-extrema.design[,i])*design.min[i] + extrema.design[,i]*design.max[i]}; extrema.design <- rbind(extrema.design,extrema.design)
-    data.extrema <- matrix(c(rep(0,dim(extrema.design)[1]/2),rep(1,dim(extrema.design)[1]/2)),dim(extrema.design)[1],1)
-    
-    #### 3.2.2 - Precompute the maxima Gradient Datum Log likelihood and Gradient Laplacian Datum Log likelihood for each datum
-    data.precompute <- array(0,c(dim(extrema.design)[1],dimen,dimen,2)); for(i in 1:dim(extrema.design)[1]){for(dim.j in 1:dimen){
-            X.row <- extrema.design[i,] # Determine row of design matrix
-            data.precompute[i,1:dimen,dim.j,1] <- abs(-n.sigma[dim.j,dim.j]*diag(n.sigma)*X.row[dim.j]*X.row)/4 # maxima Gradient Datum Log likelihood
-            data.precompute[i,1:dimen,dim.j,2] <- abs(-(n.sigma[dim.j,dim.j])^2*diag(n.sigma)*(X.row[dim.j])^2*X.row)*1/(6*sqrt(3))}} # Maxima Gradient Laplacian Datum Log likelihood
+phiL.fn         <- function(distance){-dsz*Hessian.bound*(distance*alpha.cent.bds+1)} # Function for computing the phi.ss lower bound for the logistic regression example
 
-    #### 3.2.3 - Precompute the maxima Gradient Datum Log likelihood and Laplacian Datum Log likelihood over all data
-    dim.grad.max  <- array(0,c(dimen,dimen,2)); for(dim.j in 1:dimen){for(dim.k in 1:dimen){
-        dim.grad.max[dim.j,dim.k,1] <- max(data.precompute[,dim.j,dim.k,1])     # Maximal Gradient Log Likelihood
-        dim.grad.max[dim.j,dim.k,2] <- max(data.precompute[,dim.j,dim.k,2])}}   # Maximal Laplacian Log Likelhood
+phiU.fn         <- function(distance){dsz*Hessian.bound*distance*(alpha.cent.bds+dsz*Hessian.bound*distance)} # Function for computing the phi.ss upper bound for the logistic regression example
 
-    #### 3.2.4 - Write to global scope dim.grad.max and output
-    dim.grad.max <<- dim.grad.max
-    list(design.min=design.min,design.max=design.max,dim.grad.max=dim.grad.max)}
-
-# Functional to compute dim.grad.max when design.min and design.max specfied
-
-data.extrema.2     <- function(design.min,design.max){
-    ##### 3.2.b.1 - Precompute the most extreme data values
-    extrema.design <- permutations(n=2,r=dimen,v=c(0,1),repeats.allowed=TRUE); for(i in 1:dimen){extrema.design[,i] <- (1-extrema.design[,i])*design.min[i] + extrema.design[,i]*design.max[i]}; extrema.design <- rbind(extrema.design,extrema.design)
-    data.extrema <- matrix(c(rep(0,dim(extrema.design)[1]/2),rep(1,dim(extrema.design)[1]/2)),dim(extrema.design)[1],1)
-   
-   #### 3.2.b.2 - Precompute the maxima Gradient Datum Log likelihood and Gradient Laplacian Datum Log likelihood for each datum
-   data.precompute <- array(0,c(dim(extrema.design)[1],dimen,dimen,2)); for(i in 1:dim(extrema.design)[1]){for(dim.j in 1:dimen){
-       X.row <- extrema.design[i,] # Determine row of design matrix
-       data.precompute[i,1:dimen,dim.j,1] <- abs(-n.sigma[dim.j,dim.j]*diag(n.sigma)*X.row[dim.j]*X.row)/4 # maxima Gradient Datum Log likelihood
-       data.precompute[i,1:dimen,dim.j,2] <- abs(-(n.sigma[dim.j,dim.j])^2*diag(n.sigma)*(X.row[dim.j])^2*X.row)*1/(6*sqrt(3))}} # Maxima Gradient Laplacian Datum Log likelihood
-   
-   #### 3.2.b.3 - Precompute the maxima Gradient Datum Log likelihood and Laplacian Datum Log likelihood over all data
-   dim.grad.max  <- array(0,c(dimen,dimen,2)); for(dim.j in 1:dimen){for(dim.k in 1:dimen){
-       dim.grad.max[dim.j,dim.k,1] <- max(data.precompute[,dim.j,dim.k,1])     # Maximal Gradient Log Likelihood
-       dim.grad.max[dim.j,dim.k,2] <- max(data.precompute[,dim.j,dim.k,2])}}   # Maximal Laplacian Log Likelhood
-   
-   #### 3.2.4 - Write to global scope dim.grad.max and output
-   dim.grad.max <<- dim.grad.max
-    list(design.min=design.min,design.max=design.max,dim.grad.max=dim.grad.max)}
 
 ########################################################################
 ########################################################################

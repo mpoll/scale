@@ -3,7 +3,7 @@
 ######                      Scale Algorithm                      #######
 ######                  Logistic Specification                   #######
 ######                      Large Data Example                   #######
-######               Last Updated: 31/05/2019 MP                 #######
+######               Last Updated: 25/08/2019 MP                 #######
 ########################################################################
 ########################################################################
 
@@ -38,7 +38,7 @@ beta.truth      <<- c(1,1,-1,2,-2)           # True parameters
 beta.star       <<- matrix(c(0.9999943, 0.9999501, -0.9999813, 1.9999872, -1.9999819), 1, dimen) # Fit using GLM and pooling
 ## n.sigma         <<- diag(rep(1,dimen))*dsz^(-1/2) # (DEFAULT / CLOSE TO SIMULATED DATA)
 ## n.sigma[1,1]    <- n.sigma[1,1]/2 # (DEFAULT / CLOSE TO SIMULATED DATA)
-n.sigma         <<- diag(c(2.166573e-05, 3.806254e-05, 3.806251e-05, 4.222116e-05, 4.222066e-05)) # Fit using GLM and pooling
+n.sigma         <<- diag(c(1.970953e-05, 3.692140e-05, 3.690982e-05, 3.833859e-05, 3.831116e-05)) # Fit using GLM and pooling
 n.sigma.inv     <<- solve(n.sigma)  # Parameterise preconditioning matrix (inverse Fischers information) and specification of inverse preconditioning matrix
 
 ########################################################################
@@ -70,26 +70,20 @@ data.seq     <<- function(block.idx){ # Function to re-generate data (without st
     list(idxs=data.idxs,block.idx=block.idx,x=datum.x,y=datum.y,seed=(block.idx-1))}
 
 ########################################################################
-#### 1.6 - Gradient and Laplacian Evaluation at beta.star
+#### 1.4 - Gradient and Laplacian Evaluation at beta.star
 ########################################################################
 
 grad.log.pi <<- alpha.cent <<- matrix(c(-0.08079420,-0.04208156,0.04415533,-0.10456903,0.10873715),1,5) # Centering value of grad.log.pi at beta.star computed on cluster
+alpha.cent.bds <<- sum((2*alpha.cent)^2)^(1/2)
 alpha.cent.sq <<- (alpha.cent)%*%t(alpha.cent) # alpha^2 at centering
 lap.log.pi <<- matrix(c(-1.208803, -1.064498, -1.064509, -1.215643, -1.215645),1,5) # Centering value of lap.log.pi at beta.star
 alpha.p.cent <<- sum(lap.log.pi) # alpha prime at centering
 phi.cent <<- (alpha.cent.sq+alpha.p.cent)/2 # phi at centering
+Hessian.bound <<- sum((diag(n.sigma)^2)/4)
 
 ########################################################################
 ########################################################################
-### -2- Computation of Subsampling bounding functionals
-########################################################################
-########################################################################
-
-data.extrema()
-
-########################################################################
-########################################################################
-### -3- End Function Specification
+### -2- End Function Specification
 ########################################################################
 ########################################################################
 

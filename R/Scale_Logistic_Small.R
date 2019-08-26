@@ -2,12 +2,12 @@
 ########################################################################
 ######                      Scale Algorithm                      #######
 ######                  Logistic Specification                   #######
-######                Uninformative Data Example                 #######
+######                    Small Data Example                     #######
 ######               Last Updated: 25/08/2019 MP                 #######
 ########################################################################
 ########################################################################
 
-uninformative.logistic.example    <- function(){
+small.logistic.example    <- function(){
     
     ########################################################################
     #### 0.1 - Save current seed and set data seed
@@ -26,17 +26,16 @@ uninformative.logistic.example    <- function(){
     #### 1.1 - Size, dimension, and data set
     ########################################################################
     
-    dsz             <<- 10^7                    # Size of data set
-    dimen           <<- 4                        # Dimensionality (>1)
-    beta.truth      <<- c(0,2,-2,2)            # True parameters
+    dsz             <<- 10^3                    # Size of data set
+    dimen           <<- 5                       # Dimensionality (>1)
+    beta.truth      <<- c(1,-0.5,0.5,1,-1)            # True parameters
     
     ########################################################################
     #### 1.2 - Generate pseudo-data
     ########################################################################
     
-    design.threshold.1   <<- 0.001             # Thresholding of truncated Normals column 2
-    design.threshold.2   <<- 1                # Thresholding of truncated Normals remaining columns
-    design.thresh        <<- c(1,design.threshold.1,rep(design.threshold.2,dimen-2))
+    design.threshold     <<- 1             # Thresholding of truncated Normals column 2
+    design.thresh        <<- c(1,rep(design.threshold,dimen-1))
     
     examp.design <<- matrix(1,nrow=dsz,ncol=1); for(j in 2:dimen){examp.design <<- cbind(examp.design,msm::rtnorm(dsz,mean=0,sd=1,lower=-design.thresh[j],upper=design.thresh[j]))}
     generate.datum <- function(x){datum.z <- exp(sum(beta.truth*x)); rbinom(1,1,datum.z/(1+datum.z))}
@@ -79,10 +78,10 @@ uninformative.logistic.example    <- function(){
     alpha.cent.sq <<- intensity.initialisation$alpha.cent.sq
     alpha.p.cent <<- intensity.initialisation$alpha.p.cent
     phi.cent <<- intensity.initialisation$phi.cent
-    
+
     H.mat <- matrix(0,dimen,dimen)
     for(i in 1:dimen){for(j in 1:dimen){H.mat[i,j] <- n.sigma[i,i]*n.sigma[j,j]*design.thresh[i]*design.thresh[j]/4}}
-
+    
     Hessian.bound <<- max(eigen(H.mat)$values)
     
     ########################################################################

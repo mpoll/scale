@@ -1,22 +1,22 @@
-############################################
-############################################
-######       Scale Algorithm         #######
-######    Logistic Specification     #######
-######         User Example          #######
-###### Last Updated: 11/06/2018 MP   #######
-############################################
-############################################
+########################################################################
+########################################################################
+######                      Scale Algorithm                      #######
+######                  Logistic Specification                   #######
+######                      Airline Data Example                 #######
+######               Last Updated: 25/08/2019 MP                 #######
+########################################################################
+########################################################################
 
 airline.logistic.example   <- function(){
     
     ########################################################################
     #### 0.1 - Save current seed and set data seed
     ########################################################################
-    
+
     curr.seed <- .Random.seed
     set.seed(1)
-    load("airline_raw.RData")
-    load("airline.RData")
+    load("airline_raw.RData") # Raw data set
+    #load("airline.RData") # Data set pre-computed using the below functionals
     
     ########################################################################
     ########################################################################
@@ -51,7 +51,7 @@ airline.logistic.example   <- function(){
     subset.size <- dsz/subsets # Subset size
     data.partitions <- 1 + c(0:(subsets-1))*subset.size
     
-    ### Execute seperate GLM logisitc fit for specified subsets, saving output
+    ### Execute seperate GLM logistic fit for specified subsets, saving output
     
     subsets.fit <- list()
     for(i in 1:subsets){
@@ -67,14 +67,15 @@ airline.logistic.example   <- function(){
     
     #### 1.2.2 - Preconditioning Matrix
     
-    precon.inv <- matrix(0,dimen,dimen); for(i in 1:subsets){precon.inv <- precon.inv + subsets.fit[[i]]$precon.inv}; precon <- solve(precon.inv)
+    precon.inv <<- matrix(0,dimen,dimen); for(i in 1:subsets){precon.inv <- precon.inv + subsets.fit[[i]]$precon.inv};
+    precon <<- solve(precon.inv)
     
-    n.sigma <<- diag(sqrt(as.vector(diag(precon)))); n.sigma.inv <<- solve(n.sigma) # Parameterise preconditioning matrix (inverse Fischers information) and specification of inverse preconditioning matrix
+    n.sigma <<- solve(diag(sqrt(diag(precon.inv)))); n.sigma.inv <<- solve(n.sigma) # Parameterise preconditioning matrix (inverse Fischers information) and specification of inverse preconditioning matrix
     
-    #############################################
+    ########################################################################
     #### 1.3 - Data Recaller
-    #############################################
-    
+    ########################################################################
+
     datum     <<- function(datum.idx){
         datum.x         <- as.numeric(examp.design[datum.idx,])
         datum.y         <- as.numeric(examp.data[datum.idx])
@@ -83,12 +84,6 @@ airline.logistic.example   <- function(){
     ########################################################################
     #### 1.4 - Gradient and Laplacian Evaluation at beta.star
     ########################################################################
-    
-    # Partition data set into executable pieces
-    
-    subsets <- 13 # Total Number of subsets
-    subset.size <- dsz/subsets # Subset size
-    data.partitions <- 1 + c(0:(subsets-1))*subset.size
     
     # Compute alpha + alpha.p for centering point for each partition
     
@@ -105,48 +100,17 @@ airline.logistic.example   <- function(){
     # Compute total alpha + alpha.p (summate)
     
     alpha.cent <<- matrix(as.numeric(apply(subset.alpha.cent,2,sum)),nrow=1)
+    alpha.cent.bds <<- sum((2*alpha.cent)^2)^(1/2)
     alpha.cent.sq <<- (alpha.cent)%*%t(alpha.cent)
     alpha.p.cent <<- sum(subset.alpha.p.cent)
     phi.cent <<- (alpha.cent.sq+alpha.p.cent)/2
+    Hessian.bound <<- sum((diag(n.sigma)^2)/4)
     
     ########################################################################
     ########################################################################
-    ### -2- Computation of Subsampling bounding functionals
+    ### -2- End Function Specification
     ########################################################################
     ########################################################################
-    
-    # Partition data set into executable pieces
-    
-    subsets <- 13 # Total Number of subsets
-    subset.size <- dsz/subsets # Subset size
-    data.partitions <- 1 + c(0:(subsets-1))*subset.size
-    
-    # Compute extremal points for each dimension for each partition
-    
-    subsets.extreme <- list()
-    for(i in 1:subsets){
-        subset.ext <- data.extrema(data.partitions[i],subset.size)
-        subsets.extreme[[i]] <- list(subset=i,idx.start=data.partitions[i],idx.end=data.partitions[i]+subset.size-1,design.max=subset.ext$design.max,design.min=subset.ext$design.min)
-        print(i)}
-    
-    # Extract from list extremal points for each dimension
-    
-    subset.design.min <- subset.design.max <- matrix(0,subsets,dimen); for(i in 1:subsets){subset.design.min[i,] <- subsets.extreme[[i]]$design.min; subset.design.max[i,]  <- subsets.extreme[[i]]$design.max}
-    
-    # Compute global extremal points for each dimension
-    
-    design.min <- as.numeric(apply(subset.design.min,2,min))
-    design.max <- as.numeric(apply(subset.design.max,2,max))
-    
-    # Compute worst possible datum by considering combinations within extremal boundaries, and then compute maximal log.like and lap.like for these points (i.e. data.extrema() part II)
-    
-    data.extrema.2(design.min,design.max)
-    
-    ############################################
-    ############################################
-    ### -3- End Function Specification
-    ############################################
-    ############################################
     
     .Random.seed <<- curr.seed
     

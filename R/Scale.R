@@ -1,15 +1,15 @@
-############################################
-############################################
-######       Scale Algorithm         #######
-######  Last Updated: 20/08/2019 MP  #######
-############################################
-############################################
+########################################################################
+########################################################################
+######                      Scale Algorithm                      #######
+######              Last Updated: 25/08/2019 MP                  #######
+########################################################################
+########################################################################
 
-#############################################
-#############################################
+########################################################################
+########################################################################
 ### 0 - Libraries, Global Functions & Euler
-#############################################
-#############################################
+########################################################################
+########################################################################
 
 mpfrthr <- 9; mpfrpbn <- 10 # mpfr - high  precision kick in levels for alternating series
 mat.sort.c <- function(mat,mat.sz,n) {mat[rank(mat[,n],ties.method="first"),] <- mat[1:mat.sz,]; return(mat)} # Define matrix sort (ranking along column)
@@ -30,11 +30,11 @@ ins.sort.r <- function(vec,sor.mat,sor.mat.sz,n){ # Insert a vector into a sorte
             if(tau <= sor.mat[n,r.mid]){r.max <- r.mid}else{r.min <- r.mid+1}}}
     return(cbind(sor.mat[,seq_len(r.min-1),drop=FALSE],vec,sor.mat[,seq_len(sor.mat.sz-r.max+1)+r.max-1,drop=FALSE]))}
 
-#############################################
-#############################################
+########################################################################
+########################################################################
 ### 1 - Resampling Steps
-#############################################
-#############################################
+########################################################################
+########################################################################
 
 #############################################
 #### 1.1 - Particle Normalisation
@@ -93,11 +93,11 @@ resid.resamp    <- function(p.wei,n=length(p.wei),nest.resamp=strat.resamp){ # R
     }else{p.idx     <- numeric(0)} # If resampling not possible return empty vector
     list(p.idx=p.idx)} # Return particle indices
 
-#############################################
-#############################################
+########################################################################
+########################################################################
 #### 2 - Exact Algorithm Constructions
-#############################################
-#############################################
+########################################################################
+########################################################################
 
 #############################################
 #### 2.1 - Elementary EA Functions
@@ -240,13 +240,11 @@ p.path.renew <- function(p.vec,x.curr,pass.mat,cyc.mat,theta,dimen){
     if(fpt.event==1){path.update <-     p.path.renew.fpt(pass.mat,cyc.mat,p.vec["s"],x.curr,p.vec["next.ev"],theta,dimen)}else{path.update <- p.path.update(pass.mat,cyc.mat,p.vec["s"],x.curr,p.vec["next.ev"],theta,dimen)}
     list(curr.time=path.update$curr.time,next.tau=path.update$next.tau,pass.mat=path.update$pass.mat,cyc.mat=path.update$cyc.mat,x.next=path.update$x.next,fpt.event=fpt.event,oth.event=oth.event)}
 
-
-
-#############################################
-#############################################
+########################################################################
+########################################################################
 ### 3 - Scale Subfunctions - Event Rotational Scale Implementation
-#############################################
-#############################################
+########################################################################
+########################################################################
 
 #############################################
 #### 3.1 - Actual Phi Specification
@@ -264,24 +262,19 @@ ac.phi          <- function(eta.pos,dapts){
 
 ss.phi          <- function(eta.pos,dapts,ss.size){
     beta.pos <- un_scale_transform(eta.pos); factor <- dsz/ss.size # Specify beta position and factor
+    data.counter <<- data.counter + ss.size*2 # Index data access counter
     data1 <- data.eval(beta.pos,dapts[1,,"dapt.1"],factor=factor); data1.star <- data.eval(beta.star,dapts[1,,"dapt.1"],factor=factor) # Evaluate data grad log and lap log (ss 1)
     data2 <- data.eval(beta.pos,dapts[1,,"dapt.2"],factor=factor); data2.star <- data.eval(beta.star,dapts[1,,"dapt.2"],factor=factor) # Evaluate data grad log and lap log (ss 2)
-    data3 <- data.eval(beta.pos,dapts[1,,"dapt.3"],factor=factor); data3.star <- data.eval(beta.star,dapts[1,,"dapt.3"],factor=factor) # Evaluate data grad log and lap log (ss 3)
-    ((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data3$lap.log.pi)-sum(data3.star$lap.log.pi) + alpha.cent.sq + alpha.p.cent)/2}
+    ((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data1$lap.log.pi))/2}
 
 ##### 3.2.2 - Subsampling Phi intensity bounds
 
-ss.phiC         <- function(p.mat.curr,l.bound=NULL,u.bound=NULL){ # Function of current particle location, lower bounds (dimensionally), upper bounds (dimensionally)
-    l.bds <- pmin(0,l.bound); u.bds <- pmax(0,u.bound) # Extend the hyper cube to the origin (i.e. eta.star)
-    distance <- pmax(abs(l.bds),abs(u.bds))            # Compute the maximal distance in each dimension
-    alpha.bds <- alpha.prime.bds <- numeric(dimen); for(j in 1:dimen){ # Compute the bounds for alpha and alpha prime
-        alpha.bds[j]        <- dsz*sum(distance*dim.grad.max[j,,1]) # alpha bounds
-        alpha.prime.bds[j]  <- dsz*sum(distance*dim.grad.max[j,,2]) # alpha prime bounds
-    }
-    A.bds   <- alpha.bds^2 # Compute bounds on alpha^2
-    phi.bds <- (sum(2*abs(alpha.cent)*alpha.bds)+sum(A.bds)+sum(alpha.prime.bds))/2 # Compute bounds (modulo normalisation) on subsampled phi
-    phiL <- phi.cent - phi.bds; phiU <- phi.cent + phi.bds; intensity <- phiU - phiL # Compute Bounding functionals and intensity
-    list(distance=distance,alpha.bds=alpha.bds,alpha.prime.bds=alpha.prime.bds,A.bds=A.bds,phiL=phiL,phiU=phiU,intensity=intensity)}
+ss.phiC         <- function(l.bound,u.bound){ # Function of current particle location, lower bounds (dimensionally), upper bounds (dimensionally)
+    distance <- sum(pmax(abs(l.bound),abs(u.bound))^2)^(1/2) # Compute the maximal distance from the centering value
+    phiL <- phiL.fn(distance) # Computation of lower bound
+    phiU <- phiU.fn(distance) # Computation of upper bound
+    intensity <- phiU - phiL # Compute Bounding functionals and intensity
+    list(distance=distance,phiL=phiL,phiU=phiU,intensity=intensity)}
 
 #############################################
 #### 3.3 - Functionals only loaded if not otherwise defined
@@ -289,11 +282,9 @@ ss.phiC         <- function(p.mat.curr,l.bound=NULL,u.bound=NULL){ # Function of
 
 .onLoad <- function(libname,pkgname){
     ### DATA ACCESS Counter
-    
     if(exists("data.counter")==FALSE){data.counter <<- 0} # Set the data access counter to zero if it doesn't already exist
     
     ### TURN OFF THE SUB SAMPLER (REQUIRES SETTING ss.on <- FALSE)
-    
     if(exists("ss.on")==TRUE){if(ss.on==FALSE){ss.phi <- function(eta.pos,dapts,ss.size){ac.phi(eta.pos,dapts)}}}
 }
 
@@ -301,7 +292,8 @@ ss.phiC         <- function(p.mat.curr,l.bound=NULL,u.bound=NULL){ # Function of
 #### 3.4 - Approximate Algorithm Apply Functionals
 #############################################
 
-approx.intensity  <- function(eta.pos){phiCfn <- ss.phiC(eta.pos); c(phiCfn$phiL,phiCfn$phiU)}
+diffn.scaling <- 3 # Approximate absolute scaling of diffuion within unit time
+approx.intensity  <- function(eta.pos,time=t.inc){position.bound <- abs(eta.pos)+diffn.scaling*sqrt(time); phiCfn <- ss.phiC(-position.bound, position.bound); c(phiCfn$phiL,phiCfn$phiU)}
 
 #############################################
 #### 3.5 - Resampling Step - Event Rotational Implementation
@@ -337,39 +329,18 @@ scale_resamp <- function(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I,ss.si
     list(p.idx=p.idx,r.idx=r.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,resamp.I=resamp.I,ess=wei.control$ess,p.pass.arr=p.pass.arr,p.cyc.arr=p.cyc.arr)}
 
 #############################################
-#### 3.6 - Negative Weight Handling Sub-Algorithms (Approx Alg.)
+#### 3.6 - Negative Weight Handling Sub-Algorithms (Approx Alg.) == Set weights to zero
 #############################################
 
-#############################################
-######## 3.3.1 - Set weights to zero
-#############################################
-
-scale_zero.wei  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up){
+scale_zero.wei  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC){
     p.anc.neg.append <- c(p.event.ch,exp(log.p.wei[p.curr.idx]),p.curr[c("t","PhiL","PhiU")]) # Ancestral Negative Weight Record
-    list(p.anc.neg.append=p.anc.neg.append,ss.phiC=ss.phiC)}
+    list(p.anc.neg.append=p.anc.n(eg.append,ss.phiC=ss.phiC)}
 
-#############################################
-######## 3.3.3 - Set weights and index PhiC
-#############################################
-
-scale_zero.inc  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up){
-    p.anc.neg.append <- c(p.event.ch,exp(log.p.wei[p.curr.idx]),p.curr[c("t","PhiL","PhiU")]) # Ancestral Negative Weight Record
-    p.phi <- p.curr["PhiU"]-p.event.ch*p.curr["Delta"] # Compute what phi was
-    print(sprintf("Old PhiL:%f, Old PhiU:%f",p.curr["PhiL"],p.curr["PhiU"]))
-    ss.phiC <- ss.phiC.up(p.phi,p.curr["PhiL"],p.curr["PhiU"]) # Index intensity
-    print(sprintf("New PhiL:%f, New PhiU:%f",ss.phiC(1)$phiL,ss.phiC(1)$phiU))
-    list(p.anc.neg.append=p.anc.neg.append,ss.phiC=ss.phiC)}
-
-#############################################
-######## 3.3.3.1 - ss.phiC.up default index for Lipschitz likelihood
-#############################################
-ss.phiC.up      <- function(p.phi,p.phiL,p.phiU){function(p.mat.curr){list(phiL=p.phiL-2*(p.phiU-p.phiL),phiU=p.phiU+2*(p.phiU-p.phiL))}}
-
-#############################################
-#############################################
+########################################################################
+########################################################################
 ### 4 - Scale Algorithm
-#############################################
-#############################################
+########################################################################
+########################################################################
 
 #############################################
 #### 4.1 - Scale Algorithm Approximate Version
@@ -384,7 +355,11 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
     ##### (0)1.2 Initialise particle storage framework
     if(is.null(prev.simn)==TRUE){ #i.e. starting algorithm from 0
         ### Algorithm initialisation point
-        if(is.null(x.init)==TRUE){if(x.init.random==TRUE){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}}else{
+        if(is.null(x.init)==TRUE){ # Determine if user has specified particle initialisation
+            if(x.init.random==TRUE){ # Check if particles have to be randomly initialised
+                if(is.null(precon)){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(apply(t(mvrnorm(n=p.num,mu=beta.star,Sigma=as.matrix(precon))),2,scale_transform),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # Initialise from N(0,1) marginals in transformed space if there exists no preconditioning matrix, otherwise simulate from preconditioning matrix and transform.
+            }else{p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}
+        }else{
             if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
             if(dim(x.init)[2]==1){x.init <- matrix(rep(x.init,p.num),dimen,p.num)} # If x.init is a point then repeat
             p.mat <- apply(x.init,2,scale_transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
@@ -397,7 +372,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
         T.start <- prev.simn$T.fin; p.idx <- prev.simn$p.idx; log.p.wei <- prev.simn$log.p.wei; p.mat <- prev.simn$p.mat; p.layer <- prev.simn$p.layer} # Restablish Algorithm
     ##### (0)1.3 Initialise particle system
     p.layer[c("PhiL","PhiU"),] <- apply(p.mat,2,approx.intensity); p.layer[c("Delta"),] <- p.layer[c("PhiU"),] - p.layer[c("PhiL"),] # Set p.layer current particle intensity
-    p.bet.degrad.r <- p.bet.degrad <- numeric(p.num) # Initialise between resampling log weight degration
+    p.bet.degrad.r <- p.bet.degrad <- matrix(0,nrow=2,ncol=0,dimnames=list(c("c.idx","degrad"))) # Initialise between resampling log weight degration
     p.layer["s",] <- p.layer["deg.s",] <- T.start # Initialise algorithms start point
     p.layer["t",] <- p.layer["deg.s",] + rexp(p.num,rate=p.layer["Delta",]) # Set p.layer next event times
     ##### (0)1.4 Initialise particle ancestral storage framework
@@ -443,16 +418,16 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
             ###### (t.inc)2.2.b.1 ##### Select particle to be updated
             p.curr <- p.layer[,1] # Next particle to be updated
             p.curr.idx <- p.curr["c.idx"] # Define current index
-            p.curr.dapts <- array(sample(dsz,3*ss.size,replace=TRUE),c(1,ss.size,3),dimnames=list("",sprintf("ss.%i",1:ss.size),sprintf("dapt.%i",1:3))) # Find particle subsampled data points
+            p.curr.dapts <- array(sample(dsz,2*ss.size,replace=TRUE),c(1,ss.size,2),dimnames=list("",sprintf("ss.%i",1:ss.size),sprintf("dapt.%i",1:2))) # Find particle subsampled data points
             ###### (t.inc)2.2.b.2 ##### Update weight
             p.loc.next <- p.mat[,p.curr.idx] + sqrt(p.curr["t"]-p.curr["s"])*mvrnorm(1,p.mu,p.covar) # Particle location at t
             p.phi.eval <- ss.phi(p.loc.next,p.curr.dapts,ss.size)
             p.event.ch <- (p.curr["PhiU"] - p.phi.eval)/p.curr["Delta"]; if(phi.record==TRUE){p.phi.hist <- rbind(p.phi.hist,c(p.phi.eval,p.loc.next))} # Raw Poisson event increment
-            if(p.event.ch < 0){p.neg <- neg.wei.mech(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up); log.p.wei[p.curr.idx] <- -Inf; p.anc.neg <- rbind(p.anc.neg,p.neg$p.anc.neg.append); ss.phiC <- p.neg$ss.phiC}else{log.p.wei[p.curr.idx] <- log.p.wei[p.curr.idx] + log(p.event.ch)} # Apply chosen negative weight mechanism
+            if(p.event.ch < 0){p.neg <- neg.wei.mech(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC); log.p.wei[p.curr.idx] <- -Inf; p.anc.neg <- rbind(p.anc.neg,p.neg$p.anc.neg.append); ss.phiC <- p.neg$ss.phiC}else{log.p.wei[p.curr.idx] <- log.p.wei[p.curr.idx] + log(p.event.ch)} # Apply chosen negative weight mechanism
             p.bet.degrad <- cbind(p.bet.degrad,c(p.curr.idx,(p.curr["t"]-p.curr["deg.s"])*p.curr[c("PhiL")])) # Record individual particle degradation (since last resampling point)
             ###### (t.inc)2.2.b.3 ##### Update particle to new point
             p.mat[,p.curr.idx] <- p.loc.next # Update particle location
-            p.phi.bds <- ss.phiC(p.loc.next); p.curr[c("PhiL","PhiU")] <- c(p.phi.bds$phiL,p.phi.bds$phiU); p.curr["Delta"] <- p.curr["PhiU"] - p.curr["PhiL"] # Update phi bounds and intensity
+            p.phi.bds <- approx.intensity(p.loc.next,t.inc); p.curr[c("PhiL","PhiU")] <- c(p.phi.bds[1],p.phi.bds[2]); p.curr["Delta"] <- p.curr["PhiU"] - p.curr["PhiL"] # Update phi bounds and intensity
             p.curr["s"] <- p.curr["deg.s"] <- p.curr["t"] # Update current particle degradation time
             p.curr["t"] <- p.curr["deg.s"] + rexp(1,rate=p.curr["Delta"]) # Update current particle event time
             p.layer <- ins.sort.r(p.curr,p.layer[,-1],p.num-1,"t") # Re-insert particle into p.layer
@@ -487,23 +462,24 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
 #############################################
 
 # Debugging
-#p.num <- 4000
-#t.inc <- 0.001
-#T.fin <- 1
-#T.start <- 0
-#x.init.random <- TRUE
-#ss.size <- 1
-#ess.thresh <- 0.7
-#resamp.method <- resid.resamp
-#neg.wei.mech <- scale_zero.wei
-#prev.simn <- NULL
-#progress.check <- FALSE
-#phi.record <- FALSE
-#resamp.freq <- p.num-1
-#theta <- NULL
-#p.path.renew <- p.path.renew
-#x.init <- NULL
-#data.counter <- 0
+p.num <- 10
+t.inc <- 0.1
+T.start <- 0
+T.fin <- 1
+T.start <- 0
+x.init.random <- TRUE
+ss.size <- 1
+ess.thresh <- 0.7
+resamp.method <- resid.resamp
+neg.wei.mech <- scale_zero.wei
+prev.simn <- NULL
+progress.check <- FALSE
+phi.record <- FALSE
+resamp.freq <- p.num-1
+theta <- NULL
+p.path.renew <- p.path.renew
+x.init <- NULL
+data.counter <- 0
 
 
 scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,x.init.random=TRUE,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=5*p.num,theta=NULL,p.path.renew=p.path.renew){
@@ -512,11 +488,15 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
     #################
     ##### (0)1.1 #### Define dimension and other variables not pre-defined in input
     p.mu <- matrix(c(rep(0,dimen)),ncol=1,dimnames=list(sprintf("dim.%i",1:dimen),"mean")); p.covar <- diag(dimen); dimnames(p.covar) <- list(sprintf("dim.%i",1:dimen),sprintf("dim.%i",1:dimen)) # Specify algorithm dimension and Normal covariance matrix
-    if(is.null(theta)){if(is.null(dim.grad.max)){theta <- rep(dimen^(1/4)*sqrt(t.inc),dimen)}else{theta <- dimen^(1/4)*sqrt(t.inc)*(colMeans(dim.grad.max[,,1])^(-1)/max(colMeans(dim.grad.max[,,1])^(-1)))}}
+    if(is.null(theta)){theta <- rep(dimen^(1/4)*sqrt(t.inc),dimen)}
     ##### (0)1.2 Initialise particle storage framework
     if(is.null(prev.simn)==TRUE){ #i.e. starting algorithm from 0
         ### Algorithm initialisation point
-        if(is.null(x.init)==TRUE){if(x.init.random==TRUE){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}}else{
+        if(is.null(x.init)==TRUE){ # Determine if user has specified particle initialisation
+            if(x.init.random==TRUE){ # Check if particles have to be randomly initialised
+                if(is.null(precon)){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(apply(t(mvrnorm(n=p.num,mu=beta.star,Sigma=as.matrix(precon))),2,scale_transform),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # Initialise from N(0,1) marginals in transformed space if there exists no preconditioning matrix, otherwise simulate from preconditioning matrix and transform.
+            }else{p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # If simulation is not at random, then initialise at origin.
+        }else{
             if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
             if(dim(x.init)[2]==1){x.init <- matrix(rep(x.init,p.num),dimen,p.num)} # If x.init is a point then repeat
             p.mat <- apply(x.init,2,scale_transform); dimnames(p.mat)<-list(sprintf("dim.%i",1:dimen),NULL) # Transform x.init and define as p.mat
@@ -531,7 +511,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
     }else{ #i.e. restarting algorithm from some point
         T.start <- prev.simn$T.fin; p.idx <- prev.simn$p.idx; log.p.wei <- prev.simn$log.p.wei; p.mat <- prev.simn$p.mat; p.layer <- prev.simn$p.layer; p.pass.arr <- prev.simn$p.pass.arr; p.cyc.arr <- prev.simn$p.cyc.arr} # Restablish Algorithm
     ##### (0)1.3 Initialise particle system
-    for(i in 1:p.num){p.phi.bds <- ss.phiC(p.mat[,i],p.pass.arr[,"l",i],p.pass.arr[,"u",i]); p.layer[c("PhiL","PhiU"),i]<-c(p.phi.bds$phiL,p.phi.bds$phiU)}; p.layer[c("Delta"),] <- p.layer["PhiU",] - p.layer["PhiL",] # Set p.layer current particle intensity
+    for(i in 1:p.num){p.phi.bds <- ss.phiC(p.pass.arr[,"l",i],p.pass.arr[,"u",i]); p.layer[c("PhiL","PhiU"),i]<-c(p.phi.bds$phiL,p.phi.bds$phiU)}; p.layer[c("Delta"),] <- p.layer["PhiU",] - p.layer["PhiL",] # Set p.layer current particle intensity
     p.bet.degrad.r <- p.bet.degrad <- numeric(p.num) # Initialise between resampling log weight degration
     p.layer["s",] <- p.layer["deg.s",] <- T.start # Initialise algorithms start point
     p.layer["t",] <- p.layer["deg.s",] + rexp(p.num,rate=p.layer["Delta",]) # Set p.layer next event times
@@ -547,11 +527,11 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
     ##### (t.inc)2 #### Define loop stopping criteria
     ######################
     anc.times <- curr.deg.time <- T.start; t.inc.next <- T.start + t.inc; resamp.counter <- 1 # Initialise current degradation time, time of first increment and resampling counter
-    #loop.counter <- 0
+    loop.counter <- 0
     while(curr.deg.time < T.fin){ # Iterate until final time is reached
         ##### (t.inc)2.1 ##### Increment particle set to next event time
         ######################
-        #loop.counter <- loop.counter + 1; print(c(loop.counter,p.layer["next.ev",1]))
+        loop.counter <- loop.counter + 1; print(c(loop.counter,p.layer["next.ev",1]))
         if(p.layer["next.ev",1] >= t.inc.next){ # If we have reached the next increment point
             ###### (t.inc)2.2.a.1 ##### Compute particles at intermediate time point
             p.layer <- mat.sort.r(p.layer,p.num,"c.idx") # Sort p.layer matrix by current particle index
@@ -580,7 +560,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
             ###### (t.inc)2.2.b.1 ##### Select particle to be updated
             p.curr <- p.layer[,1] # Next particle to be updated
             p.curr.idx <- p.curr["c.idx"] # Define current index
-            p.curr.dapts <- array(sample(dsz,3*ss.size,replace=TRUE),c(1,ss.size,3),dimnames=list("",sprintf("ss.%i",1:ss.size),sprintf("dapt.%i",1:3))) # Find particle subsampled data points
+            p.curr.dapts <- array(sample(dsz,2*ss.size,replace=TRUE),c(1,ss.size,2),dimnames=list("",sprintf("ss.%i",1:ss.size),sprintf("dapt.%i",1:2))) # Find particle subsampled data points
             ###### (t.inc)2.2.b.2 ##### Update particle trajectory
             traj.update <- p.path.renew(p.vec=p.curr,x.curr=p.mat[,p.curr.idx],pass.mat=p.pass.arr[,,p.curr.idx],cyc.mat=p.cyc.arr[,,p.curr.idx],theta,dimen) # Iterate passage matrix
             p.mat[,p.curr.idx] <- p.loc.next <- traj.update$x.next # Particle location at next.ev
@@ -591,13 +571,13 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
                 ###### (t.inc)2.2.b.4.2 ##### Update Poisson weight
                 p.phi.eval <- ss.phi(p.loc.next,p.curr.dapts,ss.size)
                 p.event.ch <- (p.curr["PhiU"] - p.phi.eval)/p.curr["Delta"]; if(phi.record==TRUE){p.phi.hist <- rbind(p.phi.hist,c(p.phi.eval,p.loc.next))} # Raw Poisson event increment
-                if(p.event.ch < 0){p.neg <- neg.wei.mech(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC,ss.phiC.up); log.p.wei[p.curr.idx] <- -Inf; p.anc.neg <- rbind(p.anc.neg,p.neg$p.anc.neg.append); ss.phiC <- p.neg$ss.phiC}else{log.p.wei[p.curr.idx] <- log.p.wei[p.curr.idx] + log(p.event.ch)} # Apply chosen negative weight mechanism
+                if(p.event.ch < 0){p.neg <- neg.wei.mech(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC); log.p.wei[p.curr.idx] <- -Inf; p.anc.neg <- rbind(p.anc.neg,p.neg$p.anc.neg.append); ss.phiC <- p.neg$ss.phiC}else{log.p.wei[p.curr.idx] <- log.p.wei[p.curr.idx] + log(p.event.ch)} # Apply chosen negative weight mechanism
             }else{
                 ###### (t.inc)2.2.b.5 ##### If particle to be updated has no event before the next tau.bar, then update passage trajectory
                 p.pass.arr[,,p.curr.idx] <- traj.update$pass.mat; p.cyc.arr[,,p.curr.idx] <- traj.update$cyc.mat # Update pass.mat and cyc.mat
                 p.curr["tau.bar"] <- traj.update$next.tau # Determine next particle passage time
                 ###### (t.inc)2.2.b.6 ##### Update particle Poisson intensity
-                p.phi.bds <- ss.phiC(p.loc.next,p.pass.arr[,"l",p.curr.idx],p.pass.arr[,"u",p.curr.idx]); p.curr[c("PhiL","PhiU")] <- c(p.phi.bds$phiL,p.phi.bds$phiU); p.curr["Delta"] <- p.curr["PhiU"] - p.curr["PhiL"] # Update phi bounds and intensity
+                p.phi.bds <- ss.phiC(p.pass.arr[,"l",p.curr.idx],p.pass.arr[,"u",p.curr.idx]); p.curr[c("PhiL","PhiU")] <- c(p.phi.bds$phiL,p.phi.bds$phiU); p.curr["Delta"] <- p.curr["PhiU"] - p.curr["PhiL"] # Update phi bounds and intensity
             }
             ###### (t.inc)2.2.b.7 ##### Update particle event times and layer set
             p.curr["s"] <- p.curr["deg.s"] <- p.curr["next.ev"] # Update current particle degradation time
@@ -630,11 +610,11 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
     list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale_transform=scale_transform,un_scale_transform=un_scale_transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
 
 
-#############################################
-#############################################
+########################################################################
+########################################################################
 #### 5 - Scale Ergodic Extraction
-#############################################
-#############################################
+########################################################################
+########################################################################
 scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,even.weights=NULL){
     #### 1.1 #### Assign frac.idxs depending on user assignation of retain frac of simulation
     if(is.null(retain.frac)==TRUE){
@@ -697,11 +677,12 @@ scale_ergodic_2 <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.t
             simn.weights[j,] <- 1/simn$p.num}}
     list(idxs=idxs,times=times,weights=simn.weights,draws=simn.draws)}
 
-#############################################
-#############################################
+########################################################################
+########################################################################
 #### 6 - Extend existing scale algorithm
-#############################################
-#############################################
+########################################################################
+########################################################################
+
 scale_extend <- function(prev.simn,t.inc,T.extend){
     ### Extend current simulation
     new.simn <- scale_exact(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,scale_transform=scale_transform,un_scale_transform=un_scale_transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
@@ -721,11 +702,11 @@ scale_extend <- function(prev.simn,t.inc,T.extend){
         p.anc.idx <- prev.simn$p.anc.idx;p.anc.wei <- prev.simn$p.anc.wei; p.anc.mat <- prev.simn$p.anc.mat; p.anc.resamp <- prev.simn$p.anc.resamp; p.anc.ess <- prev.simn$p.anc.ess; p.phi.hist <- prev.simn$p.phi.hist; p.anc.neg <- prev.simn$p.anc.neg; anc.times <- prev.simn$anc.times}
     list(p.num=new.simn$p.num,p.idx=new.simn$p.idx,log.p.wei=new.simn$log.p.wei,p.mat=new.simn$p.mat,p.layer=new.simn$p.layer,theta=new.simn$theta,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=new.simn$resamp.freq,resamp.method=new.simn$resamp.method,neg.wei.mech=new.simn$neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=anc.times[1],t.inc=new.simn$t.inc,T.fin=new.simn$T.fin,dimen=new.simn$dimen,p.mu=new.simn$p.mu,ss.size=new.simn$ss.size,ess.thresh=new.simn$ess.thresh,ss.phi=new.simn$ss.phi,ss.phiC=new.simn$ss.phiC,p.cyc.arr=new.simn$p.cyc.arr,p.pass.arr=new.simn$p.pass.arr,scale_transform=prev.simn$scale_transform,un_scale_transform=prev.simn$un_scale_transform,progress.check=new.simn$progress.check,phi.record=new.simn$phi.record,p.path.renew=new.simn$p.path.renew)} # Output list
 
-#############################################
-#############################################
+########################################################################
+########################################################################
 #### 7 - PF ESS Calculation
-#############################################
-#############################################
+########################################################################
+########################################################################
 
 scale_ess <- function(ergodic_output) {
     ergodic_splits <- rbind((c(1:length(ergodic_output$times))-1)*(length(ergodic_output$weights)/length(ergodic_output$times))+1,(c(1:length(ergodic_output$times)))*(length(ergodic_output$weights)/length(ergodic_output$times)))
