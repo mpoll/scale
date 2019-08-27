@@ -262,7 +262,7 @@ ac.phi          <- function(eta.pos,dapts){
 
 ss.phi          <- function(eta.pos,dapts,ss.size){
     beta.pos <- un_scale_transform(eta.pos); factor <- dsz/ss.size # Specify beta position and factor
-    data.counter <<- data.counter + ss.size*2 # Index data access counter
+    scale.data.counter <<- scale.data.counter + ss.size*2 # Index data access counter
     data1 <- data.eval(beta.pos,dapts[1,,"dapt.1"],factor=factor); data1.star <- data.eval(beta.star,dapts[1,,"dapt.1"],factor=factor) # Evaluate data grad log and lap log (ss 1)
     data2 <- data.eval(beta.pos,dapts[1,,"dapt.2"],factor=factor); data2.star <- data.eval(beta.star,dapts[1,,"dapt.2"],factor=factor) # Evaluate data grad log and lap log (ss 2)
     ((data1$grad.log.pi - data1.star$grad.log.pi)%*%t(2*alpha.cent + data2$grad.log.pi - data2.star$grad.log.pi) + sum(data1$lap.log.pi))/2}
@@ -282,7 +282,7 @@ ss.phiC         <- function(l.bound,u.bound){ # Function of current particle loc
 
 .onLoad <- function(libname,pkgname){
     ### DATA ACCESS Counter
-    if(exists("data.counter")==FALSE){data.counter <<- 0} # Set the data access counter to zero if it doesn't already exist
+    if(exists("scale.data.counter")==FALSE){scale.data.counter <<- 0} # Set the data access counter to zero if it doesn't already exist
     
     ### TURN OFF THE SUB SAMPLER (REQUIRES SETTING ss.on <- FALSE)
     if(exists("ss.on")==TRUE){if(ss.on==FALSE){ss.phi <- function(eta.pos,dapts,ss.size){ac.phi(eta.pos,dapts)}}}
@@ -461,27 +461,6 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
 #### 4.2 - Scale Algorithm Exact Version
 #############################################
 
-# Debugging
-p.num <- 10
-t.inc <- 0.1
-T.start <- 0
-T.fin <- 1
-T.start <- 0
-x.init.random <- TRUE
-ss.size <- 1
-ess.thresh <- 0.7
-resamp.method <- resid.resamp
-neg.wei.mech <- scale_zero.wei
-prev.simn <- NULL
-progress.check <- FALSE
-phi.record <- FALSE
-resamp.freq <- p.num-1
-theta <- NULL
-p.path.renew <- p.path.renew
-x.init <- NULL
-data.counter <- 0
-
-
 scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,x.init.random=TRUE,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=5*p.num,theta=NULL,p.path.renew=p.path.renew){
     #################
     #### (0)1 #### Initalise Algorithm
@@ -527,11 +506,9 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
     ##### (t.inc)2 #### Define loop stopping criteria
     ######################
     anc.times <- curr.deg.time <- T.start; t.inc.next <- T.start + t.inc; resamp.counter <- 1 # Initialise current degradation time, time of first increment and resampling counter
-    loop.counter <- 0
     while(curr.deg.time < T.fin){ # Iterate until final time is reached
         ##### (t.inc)2.1 ##### Increment particle set to next event time
         ######################
-        loop.counter <- loop.counter + 1; print(c(loop.counter,p.layer["next.ev",1]))
         if(p.layer["next.ev",1] >= t.inc.next){ # If we have reached the next increment point
             ###### (t.inc)2.2.a.1 ##### Compute particles at intermediate time point
             p.layer <- mat.sort.r(p.layer,p.num,"c.idx") # Sort p.layer matrix by current particle index
