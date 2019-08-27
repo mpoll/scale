@@ -334,7 +334,7 @@ scale_resamp <- function(p.num,p.idx,log.p.wei,p.mat,p.layer,p.layer.sor.I,ss.si
 
 scale_zero.wei  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.phiC){
     p.anc.neg.append <- c(p.event.ch,exp(log.p.wei[p.curr.idx]),p.curr[c("t","PhiL","PhiU")]) # Ancestral Negative Weight Record
-    list(p.anc.neg.append=p.anc.n(eg.append,ss.phiC=ss.phiC)}
+    list(p.anc.neg.append=p.anc.neg.append,ss.phiC=ss.phiC)}
 
 ########################################################################
 ########################################################################
@@ -346,7 +346,7 @@ scale_zero.wei  <- function(p.event.ch,p.curr.idx,p.curr,p.anc.neg,log.p.wei,ss.
 #### 4.1 - Scale Algorithm Approximate Version
 #############################################
 
-scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,x.init.random=TRUE,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=5*p.num-1,theta=NULL,p.path.renew=p.path.renew){
+scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,un_scale_transform,T.start=0,x.init=NULL,x.init.random=TRUE,ss.size=1,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,resamp.freq=5*p.num,theta=NULL,p.path.renew=p.path.renew){
     #################
     #### (0)1 #### Initalise Algorithm
     #################
@@ -615,41 +615,9 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
 #### 5 - Scale Ergodic Extraction
 ########################################################################
 ########################################################################
-scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,even.weights=NULL){
-    #### 1.1 #### Assign frac.idxs depending on user assignation of retain frac of simulation
-    if(is.null(retain.frac)==TRUE){
-        frac.idxs <- 1:length(simn$anc.times) # If no specification include all
-    }else{
-        frac.idxs <- floor(length(simn$anc.times)*retain.frac):length(simn$anc.times)} # If specified include specified number
-    if(is.null(retain.frac.range)==FALSE){
-        frac.idxs <- floor(length(simn$anc.times)*retain.frac.range[1]):ceiling(length(simn$anc.times)*retain.frac.range[2])} # If a range of idxs to be included has been specified then choose specified range
-    #### 1.2 #### Assign time.idxs depending on user assignation of trunc.time of simulation
-    if(is.null(trunc.time)==TRUE){
-        time.idxs <- 1:length(simn$anc.times) # If no specification include all
-    }else{
-        if(simn$T.fin < trunc.time){time.idxs <- numeric(0)}else{time.idxs <- length(simn$anc.times[simn$anc.times <= trunc.time]):length(simn$anc.times)}} # If specified include specified number
-    if(is.null(trunc.time.range)==FALSE){
-        time.idxs <- length(simn$anc.times[simn$anc.times <= trunc.time.range[1]]):length(simn$anc.times[simn$anc.times <= trunc.time.range[2]])} # If a range of idxs to be included has been specified then choose specified range
-    #### 2 #### Find intersection of ranges and define storage matrices
-    idxs <- intersect(frac.idxs,time.idxs); p.num <- simn$p.num; l.idxs <- length(idxs); c.idxs <- 1:(p.num*l.idxs); r.idxs <- numeric(0); for(i in 1:l.idxs){r.idxs <- c(r.idxs,(0:(p.num-1))*l.idxs+i)} # Define various index extractions
-    times <- simn$anc.times[idxs] # Define times
-    if(length(idxs)==0){weights <- numeric(0); draws <- draws <- matrix(0,0,simn$dimen,dimnames=list(NULL,sprintf("dim.%i",1:simn$dimen)))}else{
-        #### 3 #### Extract particle weights
-        simn.weis <- simn$p.anc.wei[idxs,,drop=FALSE] # Define subset of weights
-        weights <- simn$p.anc.wei[r.idxs] # Assign weights
-        weights <- weights / sum(weights) # Normalise weights
-        #### 4 #### Extract particle locations location
-        simn.draws <- simn$p.anc.mat[,,idxs,drop=FALSE] # Define subset of draws
-        draws <- matrix(0,simn$p.num*length(idxs),simn$dimen,dimnames=list(NULL,sprintf("dim.%i",1:simn$dimen))) # Define draws matrix
-        for(i in 1:simn$dimen){ # Assign draws dimension at a time
-            simn.draws.dim <- simn.draws[i,,,drop=FALSE] # Extract dimension
-            draws[,i] <- simn.draws.dim[r.idxs]}} # Assign dimension to draw matrix
-    #### 5 ####
-    if(is.null(even.weights)==FALSE){if(even.weights==TRUE){p.idxs <- sample(length(weights),length(weights),replace=TRUE,prob=weights); weights <- rep(1/length(weights),length(weights)); draws <- draws[p.idxs,,drop=FALSE]}}
-    #### 6 #### Output ergodic average
-    list(idxs=idxs,times=times,weights=weights,draws=draws)}
 
-scale_ergodic_2 <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,even.weights=TRUE,transform=TRUE,retain.every=1){
+# Extract from simulation particle locations and weights appropriately normalised and according to user specified resolution
+scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.time=NULL,trunc.time.range=NULL,even.weights=TRUE,untransform=FALSE,retain.every=1){
     #### 1.1 #### Assign frac.idxs depending on user assignation of retain frac of simulation
     if(is.null(retain.frac)==TRUE){
         frac.idxs <- 1:length(simn$anc.times) # If no specification include all
@@ -666,15 +634,16 @@ scale_ergodic_2 <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.t
         time.idxs <- length(simn$anc.times[simn$anc.times <= trunc.time.range[1]]):length(simn$anc.times[simn$anc.times <= trunc.time.range[2]])} # If a range of idxs to be included has been specified then choose specified range
     #### 2 #### Find intersection of ranges and define storage matrices
     idxs <- intersect(frac.idxs,time.idxs); p.num <- simn$p.num; l.idxs <- length(idxs); c.idxs <- 1:(p.num*l.idxs); r.idxs <- numeric(0); for(i in 1:l.idxs){r.idxs <- c(r.idxs,(0:(p.num-1))*l.idxs+i)} # Define various index extractions
-    idxs <- intersect(idxs,c(1:length(simn$anc.times))*retain.every)
-    times <- simn$anc.times[idxs] # Define times
-    simn.draws <- simn$p.anc.mat[,,idxs,drop=FALSE]
-    simn.weights <- simn$p.anc.wei[idxs,,drop=FALSE]
-    if(transform==TRUE){for(j in 1:length(idxs)){simn.draws[,,j] <- apply(simn.draws[,,j],2,un_scale_transform)}}
-    if(even.weights==TRUE){
-        for(j in 1:length(idxs)){
+    idxs <- intersect(idxs,c(1:length(simn$anc.times))*retain.every) # Redefine indexes to be extracted based on frequency determined by user
+    times <- simn$anc.times[idxs] # Define times according to indicies
+    simn.draws <- simn$p.anc.mat[,,idxs,drop=FALSE] # Extract particle locations corresponding to indicies
+    simn.weights <- simn$p.anc.wei[idxs,,drop=FALSE] # Extract particle weights according to indicies
+    if(untransform==TRUE){for(j in 1:length(idxs)){simn.draws[,,j] <- apply(simn.draws[,,j],2,un_scale_transform)}} # If required, transform particles from transformed to original space
+    if(even.weights==TRUE){ # If particles have to be of even weight
+        for(j in 1:length(idxs)){ # If particles have to be of even weight, resample particles
             simn.draws[,,j] <- simn.draws[,sample(simn$p.num,simn$p.num,replace=TRUE,prob=simn.weights[j,]),j]
-            simn.weights[j,] <- 1/simn$p.num}}
+            simn.weights[j,] <- 1/simn$p.num}
+    }else{for(j in 1:length(idxs)){simn.weights[j,] <- 1/sum(simn.weights[j,])}} # If particles are not of even weight, ensure each time slice has even weighting
     list(idxs=idxs,times=times,weights=simn.weights,draws=simn.draws)}
 
 ########################################################################
@@ -683,9 +652,9 @@ scale_ergodic_2 <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.t
 ########################################################################
 ########################################################################
 
-scale_extend <- function(prev.simn,t.inc,T.extend){
+scale_extend <- function(prev.simn,t.inc,T.extend,scale_method=scale_exact){
     ### Extend current simulation
-    new.simn <- scale_exact(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,scale_transform=scale_transform,un_scale_transform=un_scale_transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
+    new.simn <- scale_method(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,scale_transform=scale_transform,un_scale_transform=un_scale_transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
     ### Append simulation
     append.len          <- length(new.simn$anc.times)-1 # Compute the number of additional mesh points to be added and
     if(append.len>=1){ # append if there are one or more
