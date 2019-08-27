@@ -385,6 +385,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
     ######################
     ##### (t.inc)2 #### Define loop stopping criteria
     ######################
+    if(exists("scale.data.counter")==FALSE){scale.data.counter <<- 0} # Initialise data access counter if it doesnt exist
     anc.times <- curr.deg.time <- T.start; t.inc.next <- T.start + t.inc; resamp.counter <- 1 # Initialise current degradation time, time of first increment and resampling counter
     while(curr.deg.time < T.fin){ # Iterate until final time is reached
         ##### (t.inc)2.1 ##### Increment particle set to next event time
@@ -505,6 +506,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
     ######################
     ##### (t.inc)2 #### Define loop stopping criteria
     ######################
+    if(exists("scale.data.counter")==FALSE){scale.data.counter <<- 0} # Initialise data access counter if it doesnt exist
     anc.times <- curr.deg.time <- T.start; t.inc.next <- T.start + t.inc; resamp.counter <- 1 # Initialise current degradation time, time of first increment and resampling counter
     while(curr.deg.time < T.fin){ # Iterate until final time is reached
         ##### (t.inc)2.1 ##### Increment particle set to next event time
@@ -586,10 +588,34 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
     ########################
     list(p.num=p.num,p.idx=p.idx,log.p.wei=log.p.wei,p.mat=p.mat,p.layer=p.layer,theta=theta,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=resamp.freq,resamp.method=resamp.method,neg.wei.mech=neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=T.start,t.inc=t.inc,T.fin=T.fin,dimen=dimen,p.mu=p.mu,ss.size=ss.size,ess.thresh=ess.thresh,ss.phi=ss.phi,ss.phiC=ss.phiC,p.cyc.arr=p.cyc.arr,p.pass.arr=p.pass.arr,scale_transform=scale_transform,un_scale_transform=un_scale_transform,progress.check=progress.check,phi.record=phi.record,p.path.renew=p.path.renew)} # Output list
 
+########################################################################
+########################################################################
+#### 5 - Extend existing scale algorithm
+########################################################################
+########################################################################
+
+scale_extend <- function(prev.simn,t.inc,T.extend,scale_method=scale_exact){
+    ### Extend current simulation
+    new.simn <- scale_method(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,scale_transform=scale_transform,un_scale_transform=un_scale_transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
+    ### Append simulation
+    append.len          <- length(new.simn$anc.times)-1 # Compute the number of additional mesh points to be added and
+    if(append.len>=1){ # append if there are one or more
+        append.vec      <- 2:length(new.simn$anc.times)
+        p.anc.idx       <- rbind(prev.simn$p.anc.idx,new.simn$p.anc.idx[append.vec,,drop=FALSE]) # Append new ancestral particle indices
+        p.anc.wei       <- rbind(prev.simn$p.anc.wei,new.simn$p.anc.wei[append.vec,,drop=FALSE]) # Append new ancestral weights
+        p.anc.mat       <- abind(prev.simn$p.anc.mat,new.simn$p.anc.mat[,,append.vec,drop=FALSE],along=3) # Append new ancestral particle matrix
+        p.anc.resamp    <- c(prev.simn$p.anc.resamp,new.simn$p.anc.resamp) # Append new ancestral resampling times
+        p.anc.ess       <- c(prev.simn$p.anc.ess,new.simn$p.anc.ess) # Append new ancestral resampling times
+        p.phi.hist      <- rbind(prev.simn$p.phi.hist,new.simn$p.phi.hist) # Append new phi values
+        p.anc.neg       <- rbind(prev.simn$p.anc.neg,new.simn$p.anc.neg) # Append new negative weight time details and count number of negative weights
+        anc.times       <- c(prev.simn$anc.times,new.simn$anc.times[append.vec]) # Append new ancestral mesh times
+    }else{ # Case where no simulation takes place - output prev.simn information
+        p.anc.idx <- prev.simn$p.anc.idx;p.anc.wei <- prev.simn$p.anc.wei; p.anc.mat <- prev.simn$p.anc.mat; p.anc.resamp <- prev.simn$p.anc.resamp; p.anc.ess <- prev.simn$p.anc.ess; p.phi.hist <- prev.simn$p.phi.hist; p.anc.neg <- prev.simn$p.anc.neg; anc.times <- prev.simn$anc.times}
+    list(p.num=new.simn$p.num,p.idx=new.simn$p.idx,log.p.wei=new.simn$log.p.wei,p.mat=new.simn$p.mat,p.layer=new.simn$p.layer,theta=new.simn$theta,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=new.simn$resamp.freq,resamp.method=new.simn$resamp.method,neg.wei.mech=new.simn$neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=anc.times[1],t.inc=new.simn$t.inc,T.fin=new.simn$T.fin,dimen=new.simn$dimen,p.mu=new.simn$p.mu,ss.size=new.simn$ss.size,ess.thresh=new.simn$ess.thresh,ss.phi=new.simn$ss.phi,ss.phiC=new.simn$ss.phiC,p.cyc.arr=new.simn$p.cyc.arr,p.pass.arr=new.simn$p.pass.arr,scale_transform=prev.simn$scale_transform,un_scale_transform=prev.simn$un_scale_transform,progress.check=new.simn$progress.check,phi.record=new.simn$phi.record,p.path.renew=new.simn$p.path.renew)} # Output list
 
 ########################################################################
 ########################################################################
-#### 5 - Scale Ergodic Extraction
+#### 6 - Scale Ergodic Extraction
 ########################################################################
 ########################################################################
 
@@ -625,65 +651,21 @@ scale_ergodic <- function(simn,retain.frac=NULL,retain.frac.range=NULL,trunc.tim
 
 ########################################################################
 ########################################################################
-#### 6 - Extend existing scale algorithm
+#### 7 - Ergodic Output Effective Sample Size Calculation
 ########################################################################
 ########################################################################
 
-scale_extend <- function(prev.simn,t.inc,T.extend,scale_method=scale_exact){
-    ### Extend current simulation
-    new.simn <- scale_method(p.num=prev.simn$p.num,t.inc=t.inc,T.fin=T.extend+prev.simn$T.fin,ss.phi=ss.phi,ss.phiC=prev.simn$ss.phiC,dimen=prev.simn$dimen,scale_transform=scale_transform,un_scale_transform=un_scale_transform,T.start=prev.simn$T.fin,ss.size=prev.simn$ss.size,ess.thresh=prev.simn$ess.thresh,resamp.method=prev.simn$resamp.method,neg.wei.mech=prev.simn$neg.wei.mech,prev.simn=prev.simn,progress.check=prev.simn$progress.check,phi.record=prev.simn$phi.record,resamp.freq=prev.simn$resamp.freq,theta=prev.simn$theta,p.path.renew=prev.simn$p.path.renew)
-    ### Append simulation
-    append.len          <- length(new.simn$anc.times)-1 # Compute the number of additional mesh points to be added and
-    if(append.len>=1){ # append if there are one or more
-        append.vec      <- 2:length(new.simn$anc.times)
-        p.anc.idx       <- rbind(prev.simn$p.anc.idx,new.simn$p.anc.idx[append.vec,,drop=FALSE]) # Append new ancestral particle indices
-        p.anc.wei       <- rbind(prev.simn$p.anc.wei,new.simn$p.anc.wei[append.vec,,drop=FALSE]) # Append new ancestral weights
-        p.anc.mat       <- abind(prev.simn$p.anc.mat,new.simn$p.anc.mat[,,append.vec,drop=FALSE],along=3) # Append new ancestral particle matrix
-        p.anc.resamp    <- c(prev.simn$p.anc.resamp,new.simn$p.anc.resamp) # Append new ancestral resampling times
-        p.anc.ess       <- c(prev.simn$p.anc.ess,new.simn$p.anc.ess) # Append new ancestral resampling times
-        p.phi.hist      <- rbind(prev.simn$p.phi.hist,new.simn$p.phi.hist) # Append new phi values
-        p.anc.neg       <- rbind(prev.simn$p.anc.neg,new.simn$p.anc.neg) # Append new negative weight time details and count number of negative weights
-        anc.times       <- c(prev.simn$anc.times,new.simn$anc.times[append.vec]) # Append new ancestral mesh times
-    }else{ # Case where no simulation takes place - output prev.simn information
-        p.anc.idx <- prev.simn$p.anc.idx;p.anc.wei <- prev.simn$p.anc.wei; p.anc.mat <- prev.simn$p.anc.mat; p.anc.resamp <- prev.simn$p.anc.resamp; p.anc.ess <- prev.simn$p.anc.ess; p.phi.hist <- prev.simn$p.phi.hist; p.anc.neg <- prev.simn$p.anc.neg; anc.times <- prev.simn$anc.times}
-    list(p.num=new.simn$p.num,p.idx=new.simn$p.idx,log.p.wei=new.simn$log.p.wei,p.mat=new.simn$p.mat,p.layer=new.simn$p.layer,theta=new.simn$theta,p.anc.idx=p.anc.idx,p.anc.wei=p.anc.wei,p.anc.mat=p.anc.mat,resamp.freq=new.simn$resamp.freq,resamp.method=new.simn$resamp.method,neg.wei.mech=new.simn$neg.wei.mech,p.anc.resamp=p.anc.resamp,p.anc.ess=p.anc.ess,p.anc.neg=p.anc.neg,p.phi.hist=p.phi.hist,anc.times=anc.times,T.start=anc.times[1],t.inc=new.simn$t.inc,T.fin=new.simn$T.fin,dimen=new.simn$dimen,p.mu=new.simn$p.mu,ss.size=new.simn$ss.size,ess.thresh=new.simn$ess.thresh,ss.phi=new.simn$ss.phi,ss.phiC=new.simn$ss.phiC,p.cyc.arr=new.simn$p.cyc.arr,p.pass.arr=new.simn$p.pass.arr,scale_transform=prev.simn$scale_transform,un_scale_transform=prev.simn$un_scale_transform,progress.check=new.simn$progress.check,phi.record=new.simn$phi.record,p.path.renew=new.simn$p.path.renew)} # Output list
-
-########################################################################
-########################################################################
-#### 7 - PF ESS Calculation
-########################################################################
-########################################################################
-
-scale_ess <- function(ergodic_output) {
-    ergodic_splits <- rbind((c(1:length(ergodic_output$times))-1)*(length(ergodic_output$weights)/length(ergodic_output$times))+1,(c(1:length(ergodic_output$times)))*(length(ergodic_output$weights)/length(ergodic_output$times)))
-    p.means <- p.sds <- matrix(0,dim(ergodic_output$draws)[2],length(ergodic_output$times))
-    for(i in 1:length(ergodic_output$times)){
-        for(j in 1:dim(ergodic_output$draws)[2]){
-            p.means[j,i] <- mean(ergodic_output$draws[ergodic_splits[1,i]:ergodic_splits[2,i],j])
-            p.sds[j,i] <- sd(ergodic_output$draws[ergodic_splits[1,i]:ergodic_splits[2,i],j])
-        }
-    }
-    ess <- numeric(0)
-    for(j in 1:dim(ergodic_output$draws)[2]){
-        n=length(p.means[j,])
-        mns=p.means[j,]
-        vars=p.sds[j,]^2
-        
-        pos.mn=mean(mns)
-        pos.var=mean(vars+(mns-pos.mn)^2)
-        
-        var.marg=(mns-pos.mn)^2
-        
-        Mar.ess=pos.var/mean(var.marg)
-        
-        a=acf(mns)
-        #ACT=(2*sum(a[[1]])-1)
-        ACT=(1+a[[1]][2])/(1-a[[1]][2])
-        
-        ess[j]=Mar.ess/ACT
-    }
-    list(ess=ess,p.means=p.means,p.sds=p.sds)
-}
-
-
-
+scale_ess <- function(ergodic_output){
+    number.times <- length(ergodic_output$times) # Determine the number of time slices included within the ergodic output
+    number.dimen <- dim(ergodic_output$draws)[1] # Determine the number of dimensions
+    p.means <- p.sds <- matrix(0, number.dimen,number.times) # Storage matrices for particle means and sds
+    for(t in 1:number.times){for(d in 1:number.dimen){p.means[d,t] <- mean(ergodic_output$draws[d,,t]); p.sds[d,t] <- sd(ergodic_output$draws[d,,t])}} # Determine mean and sds for each time slice and dimension
+    ess <- numeric(number.dimen) # Storage vector for ESS proxy
+    for(d in 1:number.dimen){ # Computation of ESS by dimension
+        dimen.pos.mean <- mean(p.means[d,]) # Mean of time slice means
+        dimen.mean.var <- (p.means[d,]-dimen.pos.mean)^2 # Variance of time slice means
+        dimen.pos.var <- mean((p.sds[d,]^2)+dimen.mean.var) # Variance of time slice
+        dimen.mar.ess <- dimen.pos.var/mean(dimen.mean.var) # Raw ESS
+        dimen.act <- (1+acf(p.means[d,])[[1]][2])/(1-acf(p.means[d,])[[1]][2]) # Dimension autocorrelation time
+        ess[d] <- dimen.mar.ess/dimen.act} # ESS accounting for autocorrelation
+    list(ess=ess,p.means=p.means,p.sds=p.sds)}
