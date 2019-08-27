@@ -145,21 +145,21 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^13,t.inc=0.01,T.
     time.elapse <- system.time(simn <<- scale_method(p.num=p.num,t.inc=t.inc,T.fin=T.extend,ss.phi=ss.phi,ss.phiC=ss.phiC,dimen=dimen,scale_transform=scale_transform,un_scale_transform=un_scale_transform,T.start=0,x.init=x.init,x.init.random=x.init.random,ss.size=ss.size,ess.thresh=0.5,resamp.method=resid.resamp,neg.wei.mech=scale_zero.wei,prev.simn=NULL,progress.check=FALSE,phi.record=FALSE,p.path.renew=p.path.renew))[3]
     # Save current seed and current data
     curr.seed <- .Random.seed
-    save(file=fnm,simn=simn,scale_method=scale_exact,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)
+    save(file=fnm,simn=simn,scale_method=scale_method,scale.data.counter=scale.data.counter,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)
     # Run Scale outputting current seed and current simulation
     while(simn$T.fin < run.length){time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend,scale_method=scale_exact))[3]
         time.elapse <- time.elapse + time.inc
         curr.seed <- .Random.seed
-        save(file=fnm,simn=simn,scale_method=scale_exact,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
+        save(file=fnm,simn=simn,scale_method=scale_method,scale.data.counter=scale.data.counter,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
 
-scale_logistic_relaunch <- function(fnm="logistic_default.RData",run.extend = 10,t.inc=NULL,T.extend=NULL){
+scale_logistic_relaunch <- function(fnm="logistic_default.RData",run.extend = 10,t.inc=NULL,T.extend=NULL,scale_method=scale_exact){
     .Random.seed <- curr.seed # Reset seed
     if(is.null(t.inc)==TRUE){t.inc <- simn$t.inc}; if(is.null(T.extend)==TRUE){T.extend <- t.inc}
     T.start <- simn$T.fin
-    while(simn$T.fin < T.start + run.extend){time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend))[3]
+    while(simn$T.fin < T.start + run.extend){time.inc <- system.time(simn <<- scale_extend(simn,t.inc,T.extend,scale_method=scale_method))[3]
         time.elapse <- time.elapse + time.inc
         curr.seed <- .Random.seed
-        save(file=fnm,simn=simn,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
+        save(file=fnm,simn=simn,scale_method=scale_method,scale.data.counter=scale.data.counter,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
 
 #############################################
 #############################################
