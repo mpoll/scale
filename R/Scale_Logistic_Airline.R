@@ -15,8 +15,8 @@ airline.logistic.example   <- function(){
 
     curr.seed <- .Random.seed
     set.seed(1)
-    load("airline_raw.RData") # Raw data set
-    #load("airline.RData") # Data set pre-computed using the below functionals
+    load("data_airline_raw.RData") # Raw data set
+    #load("data_airline.RData") # Data set pre-computed using the below functionals. Note computation of the GLM fit and control variates is broken into parts subject to the constraints of the developers computer.
     
     ########################################################################
     ########################################################################
@@ -37,12 +37,17 @@ airline.logistic.example   <- function(){
     
     ### If airline.RData is not loaded then the following steps are required
     
-    ### Note the "Airline" data set ("airline_raw.RDatahas been pre-processed so that examp.design (the design matrix for the example) and examp.data (the data for the example) are in the required form for execution.
+    ### Note the "Airline" data set ("airline_raw.RData has to be pre-processed so that examp.design (the design matrix for the example) and examp.data (the data for the example) are in the required form for execution.
     
-    #airline <- airline[sample.int(dsz, dsz, replace = FALSE),]
-    #examp.design <- matrix(0,dsz,dimen); examp.design[,1] <- 1; for(j in 2:dimen){examp.design[,j] <- as.numeric(airline[,j])}; examp.design <<- examp.design
-    #examp.data <<- airline[,1]
+    ### The airline data set is highly structured, and so it is advisable to permute the data before compute GLM fit, and associated control variates
     
+    ### Column 1 of the airline data set corresponds to the data, the remainder the covariates
+    
+    airline <- airline[sample.int(dsz, dsz, replace = FALSE),]
+    examp.design <- matrix(0,dsz,dimen); examp.design[,1] <- 1; for(j in 2:dimen){examp.design[,j] <- as.numeric(airline[,j])}; examp.design <<- examp.design
+    examp.data <<- airline[,1]
+
+
     ########################################################################
     #### 1.2 - Centering Computation
     ########################################################################

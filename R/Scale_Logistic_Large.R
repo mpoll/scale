@@ -15,6 +15,7 @@ large.logistic.example    <- function(){
 
 curr.seed <- .Random.seed
 set.seed(1)
+#load("data_large.RData") # Data set pre-computed using the below functionals: note computation of the below requires breaking up the computation of the GLM fit and control variates. Please contact M Pollock for details, which are of the form (although larger) of the airline data set.
 
 ########################################################################
 ########################################################################

@@ -15,7 +15,7 @@ small.logistic.example    <- function(){
     
     curr.seed <- .Random.seed
     set.seed(1)
-    
+    #load("data_small.RData") # Data set pre-computed using the below functionals
     ########################################################################
     ########################################################################
     ### -1- Specification of Data Set
