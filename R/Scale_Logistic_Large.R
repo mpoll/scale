@@ -48,7 +48,7 @@ n.sigma.inv     <<- solve(n.sigma)  # Parameterise preconditioning matrix (inve
 
 library('msm')                            # Package to generate truncated Normals
 design.thresh   <<- 1                     # Thresholding of truncated Normals
-design.max <<- rep(design.thresh,dimen); design.min <<- c(1,rep(-1,design.thresh))
+design.max <<- rep(design.thresh,dimen); design.min <<- c(1,rep(-design.thresh,dimen-1))
 
 block.length <<- 2^8; total.blocks <<- dsz/block.length
 
@@ -74,10 +74,10 @@ data.seq     <<- function(block.idx){ # Function to re-generate data (without st
 #### 1.4 - Gradient and Laplacian Evaluation at beta.star
 ########################################################################
 
-grad.log.pi <<- alpha.cent <<- matrix(c(-0.08079420,-0.04208156,0.04415533,-0.10456903,0.10873715),1,5) # Centering value of grad.log.pi at beta.star computed on cluster
+grad.log.pi <<- alpha.cent <<- matrix(c(-0.07349928,-0.04081993,0.04281812,-0.09495308,0.09866843),1,5) # Centering value of grad.log.pi at beta.star computed on cluster
 alpha.cent.bds <<- sum((2*alpha.cent)^2)^(1/2)
 alpha.cent.sq <<- (alpha.cent)%*%t(alpha.cent) # alpha^2 at centering
-lap.log.pi <<- matrix(c(-1.208803, -1.064498, -1.064509, -1.215643, -1.215645),1,5) # Centering value of lap.log.pi at beta.star
+lap.log.pi <<- matrix(c(-1.000372,-1.001626,-1.001009,-1.002347,-1.000938),1,5) # Centering value of lap.log.pi at beta.star
 alpha.p.cent <<- sum(lap.log.pi) # alpha prime at centering
 phi.cent <<- (alpha.cent.sq+alpha.p.cent)/2 # phi at centering
 Hessian.bound <<- sum((diag(n.sigma)^2)/4)
