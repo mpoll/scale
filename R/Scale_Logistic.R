@@ -130,7 +130,7 @@ phiU.fn         <- function(distance){dsz*Hessian.bound*distance*(alpha.cent.bds
 ########################################################################
 ########################################################################
 
-scale_logistic <- function(fnm="logistic_default.RData",p.num=2^13,t.inc=0.01,T.extend=0.01,run.length=10,ss.size=1,x.init=NULL,x.init.random=TRUE,seed.default=1,data.precompute=TRUE,scale_method=scale_exact){
+scale_logistic <- function(fnm="logistic_default.RData",p.num=2^13,t.inc=0.01,T.extend=0.01,run.length=100,ss.size=1,x.init=NULL,x.init.random=TRUE,seed.default=1,data.precompute=TRUE,scale_method=scale_exact){
     # Set seed to default seed
     set.seed(seed.default); if(exists("curr.seed")==TRUE){.Random.seed <<- curr.seed}
     # Data precomputed by default. If not, compute using the following files
@@ -152,7 +152,7 @@ scale_logistic <- function(fnm="logistic_default.RData",p.num=2^13,t.inc=0.01,T.
         curr.seed <- .Random.seed
         save(file=fnm,simn=simn,scale_method=scale_method,scale.data.counter=scale.data.counter,curr.seed=curr.seed,time.elapse=time.elapse); print(time.elapse)}}
 
-scale_logistic_relaunch <- function(fnm="logistic_default.RData",run.extend = 10,t.inc=NULL,T.extend=NULL,seed.default=1,scale_method=scale_exact){
+scale_logistic_relaunch <- function(fnm="logistic_default.RData",run.extend = 100,t.inc=NULL,T.extend=NULL,seed.default=1,scale_method=scale_exact){
     set.seed(seed.default); if(exists("curr.seed")==TRUE){.Random.seed <<- curr.seed}
     if(is.null(t.inc)==TRUE){t.inc <- simn$t.inc}; if(is.null(T.extend)==TRUE){T.extend <- t.inc}
     T.start <- simn$T.fin
