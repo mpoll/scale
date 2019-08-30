@@ -225,7 +225,7 @@ p.path.renew.fpt <- function(pass.mat,cyc.mat,curr.time,x.curr,next.time,theta,d
         dimen.update             <- cyc.mat[1,"dimen"] # Select the dimension that has to be updated
         fpt.update                  <- bm.pass(s=next.time,x=x.next[dimen.update],theta=theta[dimen.update]) # Find the next FPT for given dimension
         pass.mat[dimen.update,] <- entry.update <- c(dimen.update, fpt.update$tau, fpt.update$y, fpt.update$minI, x.next[dimen.update] - theta[dimen.update], x.next[dimen.update] + theta[dimen.update]) # Determine entry for new FPT within dimension passage matrices and update
-        cyc.mat                 <- ins.sort.c(entry.update,cyc.mat[-1,],dimen-1,2) # Update tau sorted passage matrix
+        cyc.mat                 <- ins.sort.c(entry.update,cyc.mat[-1,,drop=FALSE],dimen-1,2) # Update tau sorted passage matrix
         list(curr.time=next.time,next.tau=cyc.mat[1,"tau"],pass.mat=pass.mat,cyc.mat=cyc.mat,x.next=x.next)}
     else{
         x.next                     <- p.path.update(pass.mat,cyc.mat,curr.time,x.curr,next.time,theta,dimen)$x.next # Update path to intermediate point
@@ -357,7 +357,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
         ### Algorithm initialisation point
         if(is.null(x.init)==TRUE){ # Determine if user has specified particle initialisation
             if(x.init.random==TRUE){ # Check if particles have to be randomly initialised
-                if(is.null(precon)){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(apply(t(mvrnorm(n=p.num,mu=beta.star,Sigma=as.matrix(precon))),2,scale_transform),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # Initialise from N(0,1) marginals in transformed space if there exists no preconditioning matrix, otherwise simulate from preconditioning matrix and transform.
+                if(exists("precon")==FALSE){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(apply(t(mvrnorm(n=p.num,mu=beta.star,Sigma=as.matrix(precon))),2,scale_transform),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # Initialise from N(0,1) marginals in transformed space if there exists no preconditioning matrix, otherwise simulate from preconditioning matrix and transform.
             }else{p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}
         }else{
             if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
@@ -431,7 +431,7 @@ scale_approx <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,
             p.phi.bds <- approx.intensity(p.loc.next,t.inc); p.curr[c("PhiL","PhiU")] <- c(p.phi.bds[1],p.phi.bds[2]); p.curr["Delta"] <- p.curr["PhiU"] - p.curr["PhiL"] # Update phi bounds and intensity
             p.curr["s"] <- p.curr["deg.s"] <- p.curr["t"] # Update current particle degradation time
             p.curr["t"] <- p.curr["deg.s"] + rexp(1,rate=p.curr["Delta"]) # Update current particle event time
-            p.layer <- ins.sort.r(p.curr,p.layer[,-1],p.num-1,"t") # Re-insert particle into p.layer
+            p.layer <- ins.sort.r(p.curr,p.layer[,-1,drop=FALSE],p.num-1,"t") # Re-insert particle into p.layer
             ###### (t.inc)2.2.b.4 ##### Resample
             if(resamp.counter%%(resamp.freq)==0){ # Resample if resample counter sufficient
                 ### Update particle degradation matrix and aggregate weight degradation
@@ -474,7 +474,7 @@ scale_exact <- function(p.num,t.inc,T.fin,ss.phi,ss.phiC,dimen,scale_transform,u
         ### Algorithm initialisation point
         if(is.null(x.init)==TRUE){ # Determine if user has specified particle initialisation
             if(x.init.random==TRUE){ # Check if particles have to be randomly initialised
-                if(is.null(precon)){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(apply(t(mvrnorm(n=p.num,mu=beta.star,Sigma=as.matrix(precon))),2,scale_transform),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # Initialise from N(0,1) marginals in transformed space if there exists no preconditioning matrix, otherwise simulate from preconditioning matrix and transform.
+                if(exists("precon")==FALSE){p.mat <- matrix(rnorm(dimen*p.num,0,1),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))}else{p.mat <- matrix(apply(t(mvrnorm(n=p.num,mu=beta.star,Sigma=as.matrix(precon))),2,scale_transform),dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # Initialise from N(0,1) marginals in transformed space if there exists no preconditioning matrix, otherwise simulate from preconditioning matrix and transform.
             }else{p.mat <- matrix(0,dimen,p.num,dimnames=list(sprintf("dim.%i",1:dimen),NULL))} # If simulation is not at random, then initialise at origin.
         }else{
             if(is.vector(x.init)){x.init <- matrix(x.init,length(x.init),1)} # If x.init is a vector transform to matrix
