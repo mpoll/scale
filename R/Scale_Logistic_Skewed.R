@@ -2,12 +2,12 @@
 ########################################################################
 ######                      Scale Algorithm                      #######
 ######                  Logistic Specification                   #######
-######         Non Gaussian (Extremal Small N) Example           #######
+######                  Skewed Logistic Example                  #######
 ######               Last Updated: 30/08/2019 MP                 #######
 ########################################################################
 ########################################################################
 
-small.logistic.example    <- function(){
+skewed.logistic.example    <- function(){
     
     ########################################################################
     #### 0.1 - Save current seed and set data seed

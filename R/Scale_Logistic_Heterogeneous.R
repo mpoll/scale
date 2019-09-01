@@ -2,12 +2,12 @@
 ########################################################################
 ######                      Scale Algorithm                      #######
 ######                  Logistic Specification                   #######
-######                Uninformative Data Example                 #######
+######                Heterogeneous Data Example                 #######
 ######               Last Updated: 25/08/2019 MP                 #######
 ########################################################################
 ########################################################################
 
-uninformative.logistic.example    <- function(){
+heterogeneous.logistic.example    <- function(){
     
     ########################################################################
     #### 0.1 - Save current seed and set data seed
