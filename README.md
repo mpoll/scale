@@ -11,4 +11,3 @@ library("remotes")
 remotes::install_github("mpoll/scale")
 library("scale")
 ?"scale-package"
-'''
