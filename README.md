@@ -6,7 +6,9 @@ Package containing an executable version of Scale (and related functions) for th
 
 To install the scale package, and call the associated documentation
 
-``` library("remotes")
+``` 
+library("remotes")
 remotes::install_github("mpoll/scale")
 library("scale")
-?"scale-package"'''
+?"scale-package"
+'''
